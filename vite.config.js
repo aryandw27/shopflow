@@ -57,6 +57,7 @@ export default defineConfig({
     port: 3000,
     open: false,
     cors: true,
+    allowedHosts: ['shopflow.siliconhost.online'],
   },
   preview: {
     port: 4173,
