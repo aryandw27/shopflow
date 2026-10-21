@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator – ShopFlow Admin</title>
+  <link rel="stylesheet" href="../styles/main.scss" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <style>
+    /* Print specific styling for dedicated product labels */
+    @media print {
+      body * { visibility: hidden !important; }
+      #printable-label-area, #printable-label-area * { visibility: visible !important; }
+      #printable-label-area {
+        position: fixed !important;
+        left: 50% !important;
+        top: 20px !important;
+        transform: translateX(-50%) !important;
+        width: 380px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+      }
+      .no-print { display: none !important; }
+    }
+
+    .qr-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 992px) {
+      .qr-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Product picker sidebar */
+    .product-list-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--dash-border);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      max-height: calc(100vh - 160px);
+      display: flex;
+      flex-direction: column;
+    }
+    .product-list-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--dash-border);
+      background: #f8fafc;
+    }
+    .product-search {
+      position: relative;
+      margin-top: .75rem;
+    }
+    .product-search input {
+      width: 100%;
+      padding: .5rem .75rem .5rem 2.25rem;
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      font-size: .85rem;
+      outline: none;
+      background: #fff;
+    }
+    .product-search i {
+      position: absolute;
+      left: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    .product-items-scroll {
+      overflow-y: auto;
+      padding: .5rem;
+      flex: 1;
+    }
+    .product-select-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid transparent;
+      margin-bottom: .35rem;
+    }
+    .product-select-item:hover {
+      background: #f1f5f9;
+    }
+    .product-select-item.active {
+      background: #eef2ff;
+      border-color: #4f6ef7;
+    }
+    .product-item-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #e2e8f0;
+    }
+    .product-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .product-item-name {
+      font-size: .85rem;
+      font-weight: 600;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-item-meta {
+      font-size: .75rem;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    /* Label Preview Canvas */
+    .preview-container {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--dash-border);
+      box-shadow: var(--shadow-card);
+      padding: 2rem;
+    }
+    .shelf-label-card {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+      position: relative;
+    }
+    .label-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: .85rem;
+      margin-bottom: 1.25rem;
+    }
+    .label-brand {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #4f6ef7;
+    }
+    .label-tag {
+      font-size: .7rem;
+      font-weight: 700;
+      background: #eef2ff;
+      color: #4f6ef7;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .qr-canvas-wrapper {
+      background: #fafbfc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    #qrCanvas {
+      max-width: 220px;
+      max-height: 220px;
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+    .label-details {
+      text-align: center;
+    }
+    .label-prod-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.3;
+      margin-bottom: .35rem;
+    }
+    .label-prod-sku {
+      font-size: .78rem;
+      font-family: monospace;
+      color: #64748b;
+      margin-bottom: .75rem;
+    }
+    .label-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: .6rem;
+      margin-bottom: 1rem;
+    }
+    .label-price {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #4f6ef7;
+    }
+    .label-mrp {
+      font-size: .9rem;
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+    .label-footer-instruction {
+      font-size: .75rem;
+      color: #64748b;
+      border-top: 1px solid #f1f5f9;
+      padding-top: .75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+    .label-barcode-strip {
+      margin-top: .75rem;
+      height: 20px;
+      background: repeating-linear-gradient(90deg, #1e293b, #1e293b 2px, transparent 2px, transparent 4px, #1e293b 4px, #1e293b 7px, transparent 7px, transparent 9px);
+      opacity: .6;
+      border-radius: 2px;
+    }
+
+    /* Action bar */
+    .action-panel {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+    <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-1"><i class="bi bi-qr-code-scan text-primary me-2"></i>Product QR Code & Label Generator</h1>
+        <p class="text-muted mb-0">Generate, customize, download and print high-resolution QR labels for every product in your inventory.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button id="btn-print-all" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+          <i class="bi bi-printer me-1"></i> Print Batch Labels
+        </button>
+      </div>
+    </div>
+
+    <!-- Main 2-column layout -->
+    <div class="qr-layout">
+      <!-- Left: Products List -->
+      <div class="product-list-card">
+        <div class="product-list-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold" style="font-size: .9rem;">Select Product</span>
+            <span class="badge bg-primary rounded-pill" id="product-total-badge">0 items</span>
+          </div>
+          <div class="product-search">
+            <i class="bi bi-search"></i>
+            <input type="search" id="product-search-input" placeholder="Search by name, SKU, category...">
+          </div>
+        </div>
+        <div class="product-items-scroll" id="product-list-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Right: Live QR Preview & Actions -->
+      <div class="preview-container">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <h5 class="fw-bold mb-0 text-slate-800">
+            <i class="bi bi-tag-fill text-primary me-2"></i>Physical Shelf / Tag Label Preview
+          </h5>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="text-muted small">QR Size:</span>
+            <select id="qr-size-select" class="form-select form-select-sm" style="width: auto;">
+              <option value="200">Standard (200px)</option>
+              <option value="300" selected>High-Res (300px)</option>
+              <option value="500">Ultra-Print (500px)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Printable Label Area -->
+        <div id="printable-label-area" class="shelf-label-card">
+          <div class="label-header">
+            <div class="label-brand">
+              <i class="bi bi-bag-heart-fill"></i> ShopFlow
+            </div>
+            <div class="label-tag" id="lbl-category">ELECTRONICS</div>
+          </div>
+
+          <div class="qr-canvas-wrapper">
+            <canvas id="qrCanvas"></canvas>
+          </div>
+
+          <div class="label-details">
+            <div class="label-prod-name" id="lbl-name">Product Name</div>
+            <div class="label-prod-sku">SKU: <span id="lbl-sku">SP-001</span> &bull; <span id="lbl-brand">Brand</span></div>
+            
+            <div class="label-price-row">
+              <span class="label-price" id="lbl-price">₹0</span>
+              <span class="label-mrp" id="lbl-mrp">₹0</span>
+            </div>
+
+            <div class="label-footer-instruction">
+              <i class="bi bi-camera-fill text-primary"></i>
+              Scan with phone camera to view full specs & buy
+            </div>
+
+            <div class="label-barcode-strip"></div>
+            <div style="font-size: .65rem; color: #94a3b8; margin-top: 3px; font-family: monospace;" id="lbl-barcode-text">
+              SF-PROD-00000000
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-panel no-print">
+          <button id="btn-print" class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill">
+            <i class="bi bi-printer-fill"></i>
+            Print This Label
+          </button>
+          <button id="btn-download-qr" class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-pill">
+            <i class="bi bi-qr-code"></i>
+            Download QR Only (PNG)
+          </button>
+          <button id="btn-test-url" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 rounded-pill">
+            <i class="bi bi-box-arrow-up-right"></i>
+            Test Product Webpage
+          </button>
+        </div>
+
+        <!-- Target Scan URL info card -->
+        <div class="mt-4 p-3 bg-light rounded-3 border no-print">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="small text-muted fw-semibold">
+              <i class="bi bi-link-45deg me-1"></i>Encoded Landing Destination URL:
+            </div>
+            <span class="badge bg-success-subtle text-success">Active & Resolving</span>
+          </div>
+          <div id="target-url-preview" class="text-break font-monospace small text-primary mt-1 select-all" style="user-select: all;">
+            http://localhost:3000/product-detail.html?id=prod-001
+          </div>
+          <p class="small text-muted mt-2 mb-0">
+            When any customer or in-store shopper scans this physical QR with an iPhone or Android camera, they are instantly transported to the dedicated product webpage with full details, specs, stock levels, and one-click add to cart!
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Hidden batch print template -->
+<div id="batch-print-modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Batch Print All Product Labels</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">Ready to print all product tags onto label sheets. Click print below to send directly to your receipt/sticker printer.</p>
+        <div id="batch-labels-grid" class="d-flex flex-wrap gap-3 justify-content-center"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initDashboardShell, formatINR, showToast } from '../scripts/dashboard-shell.js';
+  import { AuthStore, ProductStore } from '../scripts/store.js';
+  import * as bootstrap from 'bootstrap';
+
+  // Auth requirement: admin only
+  const user = initDashboardShell({ activePage: 'qr', pageTitle: 'QR Code Generator' });
+  if (!user || user.role !== 'admin') {
+    window.location.href = './index.html';
+  }
+
+  let products = ProductStore.getAll();
+  let selectedProduct = products[0] || null;
+
+  const container = document.getElementById('product-list-container');
+  const searchInput = document.getElementById('product-search-input');
+  const totalBadge = document.getElementById('product-total-badge');
+  const sizeSelect = document.getElementById('qr-size-select');
+  const canvas = document.getElementById('qrCanvas');
+
+  // Render product list in left panel
+  function renderProductList(filterText = '') {
+    const filtered = products.filter(p => 
+      p.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      (p.sku && p.sku.toLowerCase().includes(filterText.toLowerCase())) ||
+      (p.category && p.category.toLowerCase().includes(filterText.toLowerCase()))
+    );
+
+    totalBadge.textContent = `${filtered.length} items`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="p-4 text-center text-muted small">No products found</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => `
+      <div class="product-select-item ${selectedProduct && selectedProduct.id === p.id ? 'active' : ''}" 
+           data-id="${p.id}">
+        <img class="product-item-img" src="${p.image || 'https://via.placeholder.com/80'}" alt="${p.name}">
+        <div class="product-item-info">
+          <div class="product-item-name">${p.name}</div>
+          <div class="product-item-meta">
+            <span>${p.sku || 'No SKU'}</span>
+            <span class="fw-bold text-primary">${formatINR(p.price)}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach click handlers
+    container.querySelectorAll('.product-select-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.id;
+        selectedProduct = products.find(p => p.id === id);
+        container.querySelectorAll('.product-select-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        updateLabel();
+      });
+    });
+  }
+
+  // Get full absolute target URL for product detail
+  function getProductUrl(prodId) {
+    const origin = window.location.origin;
+    // Determine path to product-detail.html
+    let path = window.location.pathname;
+    if (path.includes('/dashboard/')) {
+      path = path.replace(/\/dashboard\/.*$/, '/product-detail.html');
+    } else {
+      path = '/product-detail.html';
+    }
+    return `${origin}${path}?id=${prodId}`;
+  }
+
+  // Generate QR Code and update Preview Label
+  function updateLabel() {
+    if (!selectedProduct) return;
+
+    const p = selectedProduct;
+    document.getElementById('lbl-name').textContent = p.name;
+    document.getElementById('lbl-sku').textContent = p.sku || p.id;
+    document.getElementById('lbl-brand').textContent = p.brand || 'ShopFlow';
+    document.getElementById('lbl-category').textContent = p.category ? p.category.toUpperCase() : 'GENERAL';
+    document.getElementById('lbl-price').textContent = formatINR(p.price);
+    
+    const mrpEl = document.getElementById('lbl-mrp');
+    if (p.originalPrice && p.originalPrice > p.price) {
+      mrpEl.textContent = formatINR(p.originalPrice);
+      mrpEl.style.display = 'inline';
+    } else {
+      mrpEl.style.display = 'none';
+    }
+
+    document.getElementById('lbl-barcode-text').textContent = (p.sku ? p.sku : p.id).toUpperCase();
+
+    const targetUrl = getProductUrl(p.id);
+    document.getElementById('target-url-preview').textContent = targetUrl;
+
+    const size = parseInt(sizeSelect.value, 10) || 300;
+
+    // Use QRCode library
+    if (window.QRCode) {
+      QRCode.toCanvas(canvas, targetUrl, {
+        width: size,
+        margin: 1,
+        color: {
+          dark: '#0f172a',
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'H'
+      }, function (error) {
+        if (error) console.error(error);
+      });
+    } else {
+      // Fallback to QR API image if library not yet loaded
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+      };
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(targetUrl)}`;
+    }
+  }
+
+  // Event Listeners
+  searchInput.addEventListener('input', (e) => {
+    renderProductList(e.target.value);
+  });
+
+  sizeSelect.addEventListener('change', updateLabel);
+
+  // Print single label
+  document.getElementById('btn-print').addEventListener('click', () => {
+    window.print();
+  });
+
+  // Download QR code only as PNG
+  document.getElementById('btn-download-qr').addEventListener('click', () => {
+    if (!canvas || !selectedProduct) return;
+    const link = document.createElement('a');
+    link.download = `QR_${selectedProduct.sku || selectedProduct.id}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('QR Code downloaded successfully!', 'success');
+  });
+
+  // Test URL in new tab
+  document.getElementById('btn-test-url').addEventListener('click', () => {
+    if (!selectedProduct) return;
+    window.open(getProductUrl(selectedProduct.id), '_blank');
+  });
+
+  // Batch Print modal
+  document.getElementById('btn-print-all').addEventListener('click', () => {
+    const modalEl = document.getElementById('batch-print-modal');
+    const modal = new bootstrap.Modal(modalEl);
+    const grid = document.getElementById('batch-labels-grid');
+    grid.innerHTML = '<div class="spinner-border text-primary my-4" role="status"></div>';
+    modal.show();
+
+    setTimeout(() => {
+      grid.innerHTML = products.map(p => `
+        <div style="width: 220px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; background: #fff;">
+          <div style="font-weight: 800; font-size: .8rem; color: #4f6ef7;">ShopFlow</div>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(getProductUrl(p.id))}" style="width: 120px; height: 120px; margin: 6px 0;" alt="QR">
+          <div style="font-size: .8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+          <div style="font-size: .7rem; color: #64748b;">${p.sku || p.id}</div>
+          <div style="font-size: .95rem; font-weight: 800; color: #4f6ef7; margin-top: 2px;">${formatINR(p.price)}</div>
+        </div>
+      `).join('');
+    }, 300);
+  });
+
+  // Initial load
+  renderProductList();
+  updateLabel();
+</script>
+</body>
+</html>

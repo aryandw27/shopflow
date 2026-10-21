@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart – ShopFlow</title>
+  <link rel="stylesheet" href="../styles/main.scss" />
+  <style>
+    .cart-layout { display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start; }
+    @media(max-width:768px) { .cart-layout { grid-template-columns:1fr; } }
+
+    /* Cart Items Panel */
+    .cart-panel { background:#fff; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow:hidden; }
+    .cart-panel__header { padding:1.25rem 1.5rem; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; justify-content:space-between; }
+    .cart-panel__header h2 { font-size:1.1rem; font-weight:700; color:#1e293b; margin:0; }
+    .btn-clear { background:none; border:none; font-size:.8rem; color:#ef4444; font-weight:600; cursor:pointer; padding:.3rem .6rem; border-radius:6px; }
+    .btn-clear:hover { background:#fee2e2; }
+
+    .cart-item { display:flex; align-items:center; gap:1rem; padding:1.1rem 1.5rem; border-bottom:1px solid #f1f5f9; transition:background .1s; }
+    .cart-item:last-child { border-bottom:none; }
+    .cart-item:hover { background:#fafbfc; }
+    .cart-item__img { width:68px; height:68px; border-radius:10px; object-fit:cover; background:#f1f5f9; flex-shrink:0; }
+    .cart-item__info { flex:1; min-width:0; }
+    .cart-item__name { font-weight:600; color:#1e293b; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cart-item__cat  { font-size:.75rem; color:#94a3b8; margin-top:.15rem; }
+    .cart-item__price { font-weight:700; color:#2563eb; font-size:.9rem; margin-top:.35rem; }
+    .qty-controls { display:flex; align-items:center; gap:.4rem; }
+    .qty-btn { width:30px; height:30px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; cursor:pointer; font-size:1.1rem; font-weight:700; color:#374151; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .qty-btn:hover { background:#e2e8f0; }
+    .qty-display { min-width:32px; text-align:center; font-weight:700; font-size:.95rem; color:#1e293b; }
+    .cart-item__subtotal { font-weight:700; color:#1e293b; font-size:.95rem; min-width:70px; text-align:right; }
+    .btn-remove { background:none; border:none; cursor:pointer; padding:.4rem; border-radius:6px; color:#94a3b8; font-size:1.1rem; transition:all .15s; }
+    .btn-remove:hover { background:#fee2e2; color:#dc2626; }
+
+    /* Empty state */
+    .empty-cart { padding:4rem 2rem; text-align:center; }
+    .empty-cart__icon { font-size:4rem; margin-bottom:1rem; }
+    .empty-cart__msg { font-size:1.1rem; color:#64748b; margin-bottom:1.5rem; }
+    .btn-shop { display:inline-block; padding:.65rem 1.5rem; background:#2563eb; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:.9rem; cursor:pointer; text-decoration:none; transition:background .15s; }
+    .btn-shop:hover { background:#1d4ed8; }
+
+    /* Summary Panel */
+    .summary-panel { background:#fff; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.08); padding:1.5rem; position:sticky; top:80px; }
+    .summary-panel h2 { font-size:1rem; font-weight:700; color:#1e293b; margin:0 0 1.25rem; }
+    .summary-row { display:flex; justify-content:space-between; font-size:.875rem; color:#475569; margin-bottom:.75rem; }
+    .summary-row.total { font-weight:700; font-size:1rem; color:#1e293b; margin-top:1rem; padding-top:1rem; border-top:1px solid #e2e8f0; }
+    .free-shipping { font-size:.75rem; color:#16a34a; font-weight:600; }
+    .shipping-note { font-size:.75rem; color:#64748b; margin-top:.25rem; margin-bottom:1rem; }
+    .btn-checkout { width:100%; padding:.8rem; background:#2563eb; color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:background .15s; margin-top:1rem; }
+    .btn-checkout:hover { background:#1d4ed8; }
+    .btn-checkout:disabled { background:#94a3b8; cursor:not-allowed; }
+
+    /* Modal */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-backdrop.hidden { display:none; }
+    .modal { background:#fff; border-radius:16px; width:100%; max-width:500px; max-height:92vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); display:flex; flex-direction:column; }
+    .modal-header { padding:1.25rem 1.5rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#fff; z-index:1; }
+    .modal-header h2 { font-size:1.1rem; font-weight:700; color:#1e293b; }
+    .modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; color:#94a3b8; }
+    .modal-close:hover { color:#dc2626; }
+    .modal-body { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; }
+    .modal-footer { padding:1rem 1.5rem; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:.75rem; position:sticky; bottom:0; background:#fff; }
+
+    .form-group { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group label { font-size:.8rem; font-weight:600; color:#374151; }
+    .form-group input, .form-group select { padding:.55rem .75rem; border:1px solid #e2e8f0; border-radius:8px; font-size:.875rem; width:100%; box-sizing:border-box; transition:border-color .15s; }
+    .form-group input:focus, .form-group select:focus { outline:none; border-color:#2563eb; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .section-title { font-size:.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.07em; }
+
+    .btn { padding:.55rem 1.25rem; border:none; border-radius:8px; font-weight:600; font-size:.875rem; cursor:pointer; transition:background .15s; }
+    .btn-primary   { background:#2563eb; color:#fff; }
+    .btn-primary:hover { background:#1d4ed8; }
+    .btn-secondary { background:#f1f5f9; color:#374151; }
+    .btn-secondary:hover { background:#e2e8f0; }
+
+    .success-state { text-align:center; padding:2rem; }
+    .success-state .icon { font-size:3.5rem; margin-bottom:1rem; }
+    .success-state h3 { font-size:1.2rem; font-weight:700; color:#1e293b; margin-bottom:.5rem; }
+    .success-state p { color:#64748b; font-size:.9rem; }
+  </style>
+</head>
+<body>
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+
+    <div class="page-header" style="margin-bottom:1.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#1e293b;margin:0">My Cart</h1>
+      <p style="color:#64748b;font-size:.875rem;margin:.25rem 0 0" id="cart-count-label">Loading…</p>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="cart-panel" style="display:none;">
+      <div class="empty-cart">
+        <div class="empty-cart__icon">🛒</div>
+        <div class="empty-cart__msg">Your cart is empty</div>
+        <a class="btn-shop" href="products.html">Shop Now</a>
+      </div>
+    </div>
+
+    <!-- Cart layout -->
+    <div class="cart-layout" id="cart-layout" style="display:none;">
+
+      <!-- Items list -->
+      <div class="cart-panel">
+        <div class="cart-panel__header">
+          <h2>Cart Items</h2>
+          <button class="btn-clear" id="btn-clear-cart">🗑️ Clear Cart</button>
+        </div>
+        <div id="cart-items-list"></div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="summary-panel">
+        <h2>Order Summary</h2>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="summary-subtotal">₹0</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="summary-shipping">₹99</span>
+        </div>
+        <div id="free-ship-note" class="shipping-note" style="display:none">
+          🎉 You qualify for <strong>free shipping</strong>!
+        </div>
+        <div id="ship-threshold-note" class="shipping-note">
+          Add ₹<span id="remaining-for-free"></span> more for free shipping.
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="summary-total">₹0</span>
+        </div>
+        <button class="btn-checkout" id="btn-checkout">Proceed to Checkout →</button>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- ─────────── CHECKOUT MODAL ─────────── -->
+<div class="modal-backdrop hidden" id="checkout-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Complete Your Order</h2>
+      <button class="modal-close" id="checkout-modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="checkout-modal-body">
+      <div class="section-title">Delivery Details</div>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="co-name" placeholder="Enter your full name" />
+      </div>
+      <div class="form-group">
+        <label>Delivery Address *</label>
+        <input type="text" id="co-address" placeholder="House no., Street, Area" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" id="co-city" placeholder="Mumbai" />
+        </div>
+        <div class="form-group">
+          <label>State *</label>
+          <input type="text" id="co-state" placeholder="Maharashtra" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>PIN Code *</label>
+        <input type="text" id="co-pin" maxlength="6" placeholder="400001" />
+      </div>
+      <div class="section-title" style="margin-top:.25rem;">Payment Method</div>
+      <div class="form-group">
+        <label>Select Payment *</label>
+        <select id="co-payment">
+          <option value="">Choose…</option>
+          <option value="COD">Cash on Delivery (COD)</option>
+          <option value="UPI">UPI</option>
+          <option value="Credit Card">Credit Card</option>
+          <option value="Net Banking">Net Banking</option>
+        </select>
+      </div>
+      <!-- Order total preview -->
+      <div style="background:#f8fafc;border-radius:10px;padding:1rem;display:flex;flex-direction:column;gap:.4rem;">
+        <div class="summary-row" style="margin:0"><span>Subtotal</span><span id="co-subtotal">₹0</span></div>
+        <div class="summary-row" style="margin:0"><span>Shipping</span><span id="co-shipping">₹0</span></div>
+        <div class="summary-row total" style="margin:0;padding:.5rem 0 0"><span>Total</span><span id="co-total" style="color:#2563eb">₹0</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="checkout-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="checkout-modal-place">Place Order 🎉</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initDashboardShell, formatINR, formatDate, getStatusColor, getStatusBg, showToast } from '../scripts/dashboard-shell.js';
+  import { CartStore, OrderStore, AuthStore, ProductStore } from '../scripts/store.js';
+
+  initDashboardShell({ activePage: 'cart', pageTitle: 'Cart' });
+
+  const $ = id => document.getElementById(id);
+  const SHIPPING_THRESHOLD = 999;
+  const SHIPPING_FEE       = 99;
+
+  /* ── Compute totals ── */
+  function computeTotals() {
+    const items    = CartStore.getItems();
+    let subtotal   = 0;
+    items.forEach(item => {
+      const p = ProductStore.getById(item.productId);
+      subtotal += (p?.price || 0) * (item.quantity || 1);
+    });
+    const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const total    = subtotal + shipping;
+    return { subtotal, shipping, total };
+  }
+
+  /* ── Render cart ── */
+  function renderCart() {
+    const items = CartStore.getItems();
+
+    if (!items.length) {
+      $('empty-state').style.display  = '';
+      $('cart-layout').style.display  = 'none';
+      $('cart-count-label').textContent = 'Your cart is empty';
+      return;
+    }
+
+    $('empty-state').style.display  = 'none';
+    $('cart-layout').style.display  = '';
+    $('cart-count-label').textContent = `${items.length} item${items.length !== 1 ? 's' : ''} in your cart`;
+
+    /* Items */
+    $('cart-items-list').innerHTML = items.map(item => {
+      const p       = ProductStore.getById(item.productId);
+      const name    = p?.name    || 'Unknown Product';
+      const cat     = p?.category || '';
+      const price   = p?.price   || 0;
+      const img     = p?.image   || 'https://placehold.co/68x68?text=P';
+      const subtotal= price * (item.quantity || 1);
+      return `
+        <div class="cart-item" data-id="${item.productId}">
+          <img class="cart-item__img" src="${img}" alt="${name}" onerror="this.src='https://placehold.co/68x68?text=P'" />
+          <div class="cart-item__info">
+            <div class="cart-item__name">${name}</div>
+            <div class="cart-item__cat">${cat}</div>
+            <div class="cart-item__price">${formatINR(price)}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty('${item.productId}', -1)">−</button>
+            <span class="qty-display">${item.quantity}</span>
+            <button class="qty-btn" onclick="changeQty('${item.productId}', 1)">+</button>
+          </div>
+          <div class="cart-item__subtotal">${formatINR(subtotal)}</div>
+          <button class="btn-remove" title="Remove" onclick="removeItem('${item.productId}')">✕</button>
+        </div>`;
+    }).join('');
+
+    /* Summary */
+    const { subtotal, shipping, total } = computeTotals();
+    $('summary-subtotal').textContent = formatINR(subtotal);
+    $('summary-shipping').textContent = shipping === 0 ? '🎉 Free' : formatINR(shipping);
+    $('summary-total').textContent    = formatINR(total);
+
+    if (shipping === 0) {
+      $('free-ship-note').style.display      = '';
+      $('ship-threshold-note').style.display = 'none';
+    } else {
+      $('free-ship-note').style.display      = 'none';
+      $('ship-threshold-note').style.display = '';
+      $('remaining-for-free').textContent    = formatINR(SHIPPING_THRESHOLD - subtotal).replace('₹','');
+    }
+  }
+
+  /* ── Item actions ── */
+  window.changeQty = function(productId, delta) {
+    const items   = CartStore.getItems();
+    const item    = items.find(i => i.productId === productId);
+    if (!item) return;
+    const newQty  = (item.quantity || 1) + delta;
+    if (newQty < 1) { removeItem(productId); return; }
+    CartStore.updateQty(productId, newQty);
+    renderCart();
+  };
+
+  window.removeItem = function(productId) {
+    CartStore.removeItem(productId);
+    renderCart();
+    showToast('Item removed from cart.', 'info');
+  };
+
+  $('btn-clear-cart').addEventListener('click', () => {
+    if (confirm('Clear all items from your cart?')) {
+      CartStore.clear();
+      renderCart();
+      showToast('Cart cleared.', 'info');
+    }
+  });
+
+  /* ── Checkout modal ── */
+  function openCheckout() {
+    const user = AuthStore.current();
+    $('co-name').value    = user?.name || '';
+    $('co-address').value = '';
+    $('co-city').value    = '';
+    $('co-state').value   = '';
+    $('co-pin').value     = '';
+    $('co-payment').value = '';
+
+    const { subtotal, shipping, total } = computeTotals();
+    $('co-subtotal').textContent = formatINR(subtotal);
+    $('co-shipping').textContent = shipping === 0 ? '🎉 Free' : formatINR(shipping);
+    $('co-total').textContent    = formatINR(total);
+
+    $('checkout-modal').classList.remove('hidden');
+  }
+
+  $('btn-checkout').addEventListener('click', openCheckout);
+  $('checkout-modal-close').addEventListener('click',  () => $('checkout-modal').classList.add('hidden'));
+  $('checkout-modal-cancel').addEventListener('click', () => $('checkout-modal').classList.add('hidden'));
+  $('checkout-modal').addEventListener('click', e => { if (e.target === $('checkout-modal')) $('checkout-modal').classList.add('hidden'); });
+
+  /* ── Place order ── */
+  $('checkout-modal-place').addEventListener('click', () => {
+    const name    = $('co-name').value.trim();
+    const address = $('co-address').value.trim();
+    const city    = $('co-city').value.trim();
+    const state   = $('co-state').value.trim();
+    const pin     = $('co-pin').value.trim();
+    const payment = $('co-payment').value;
+
+    if (!name || !address || !city || !state || !pin || !payment) {
+      showToast('Please fill in all required fields.', 'warning');
+      return;
+    }
+    if (!/^\d{6}$/.test(pin)) {
+      showToast('Please enter a valid 6-digit PIN code.', 'warning');
+      return;
+    }
+
+    const user  = AuthStore.current();
+    const items = CartStore.getItems();
+    const { subtotal, shipping, total } = computeTotals();
+
+    const orderPayload = {
+      userId:        user?.id,
+      items:         items.map(i => ({
+        productId:   i.productId,
+        productName: ProductStore.getById(i.productId)?.name || 'Product',
+        quantity:    i.quantity,
+        price:       ProductStore.getById(i.productId)?.price || 0,
+      })),
+      subtotal,
+      shipping,
+      total,
+      status:        'confirmed',
+      paymentMethod: payment,
+      customerName:  name,
+      address,
+      city,
+      state,
+      pin,
+      createdAt:     new Date().toISOString(),
+    };
+
+    const newOrder = OrderStore.create(orderPayload);
+    CartStore.clear();
+
+    /* Show success */
+    $('checkout-modal-body').innerHTML = `
+      <div class="success-state">
+        <div class="icon">🎉</div>
+        <h3>Order Placed Successfully!</h3>
+        <p>Your order <strong>#${newOrder.id}</strong> has been confirmed.<br/>Redirecting to your orders…</p>
+      </div>`;
+    $('checkout-modal-place').style.display  = 'none';
+    $('checkout-modal-cancel').style.display = 'none';
+
+    showToast('Order placed! Redirecting to Orders…', 'success');
+
+    setTimeout(() => {
+      window.location.href = 'orders.html';
+    }, 2200);
+  });
+
+  /* ── Init ── */
+  renderCart();
+</script>
+</body>
+</html>

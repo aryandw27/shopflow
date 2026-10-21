@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ShopFlow — Professional e-commerce platform for retailers and shop owners. Smart QR product labels, inventory management, and a powerful admin dashboard.">
+  <title id="html-title">ShopFlow — Smart Retail Platform for Shop Owners</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles/main.scss">
+  <style>
+    /* Atmospheric diffuse mesh gradient matching screenshot */
+    body.landing-page {
+      background:
+        radial-gradient(ellipse 65% 55% at 10% 15%, rgba(185, 222, 206, 0.85) 0%, transparent 70%),
+        radial-gradient(ellipse 65% 55% at 90% 12%, rgba(250, 233, 195, 0.8) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 60% at 85% 85%, rgba(206, 234, 220, 0.8) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 60% at 15% 88%, rgba(248, 228, 196, 0.7) 0%, transparent 70%),
+        #eef2f5;
+      background-attachment: fixed;
+      color: #172a27;
+    }
+
+    /* Top Announcement Bar */
+    .cms-announcement-bar {
+      background: linear-gradient(90deg, #1e4a42 0%, #296055 100%);
+      color: #ffffff;
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .cms-announcement-badge {
+      background: #36a892;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Floating CMS Quick Edit pill for Admins */
+    .admin-cms-quick-pill {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: #1e4a42;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 30px rgba(30, 74, 66, 0.35);
+      z-index: 9999;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.25s ease;
+    }
+    .admin-cms-quick-pill:hover {
+      background: #153a33;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(30, 74, 66, 0.45);
+    }
+
+    /* Elevated Mockup Box matching Screenshot */
+    .mockup-app-window {
+      background: #fbfcfd;
+      border-radius: 24px;
+      box-shadow: 0 25px 70px rgba(22, 45, 38, 0.15), 0 4px 15px rgba(0, 0, 0, 0.04);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .stat-bubble-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body class="landing-page">
+
+  <!-- Top Announcement Bar (Dynamic from CMS) -->
+  <div id="cms-announcement" class="cms-announcement-bar" style="display: none;">
+    <span class="cms-announcement-badge" id="cms-ann-badge">NEW</span>
+    <span id="cms-ann-text">Special Offer: Free QR Label Setup + Free Shipping on your first 100 orders!</span>
+    <a href="./store.html" id="cms-ann-link" class="text-white text-decoration-underline ms-1">Learn More &rarr;</a>
+  </div>
+
+  <!-- Admin Quick Edit Floating Button -->
+  <a href="./dashboard/cms.html" id="admin-cms-pill" class="admin-cms-quick-pill">
+    <i class="bi bi-pencil-square"></i>
+    <span>Edit Website in CMS</span>
+  </a>
+
+  <!-- Navbar -->
+  <nav class="landing-nav" id="landing-nav">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between">
+        <a href="./landing.html" class="nav-logo d-flex align-items-center gap-2">
+          <div style="width: 38px; height: 38px; border-radius: 12px; background: #1e4a42; display: flex; align-items: center; justify-content: center; color: white;">
+            <i class="bi bi-bag-heart-fill fs-5" id="nav-brand-icon"></i>
+          </div>
+          <span style="color: #1e4a42; font-weight: 800; font-size: 1.35rem;" id="nav-brand-name">ShopFlow</span>
+        </a>
+
+        <div class="d-flex align-items-center gap-3" id="cms-nav-links">
+          <a href="./store.html" class="neu-btn d-none d-md-inline-flex align-items-center gap-2" style="padding:10px 22px;font-size:0.88rem">
+            <i class="bi bi-shop"></i> Browse Store
+          </a>
+          <a href="./login.html" class="neu-btn d-none d-md-inline-flex align-items-center gap-2" style="padding:10px 22px;font-size:0.88rem" id="nav-auth-link">
+            <i class="bi bi-person"></i> Sign In
+          </a>
+          <a href="./register.html" class="neu-btn neu-btn-primary d-flex align-items-center gap-2" style="padding:10px 24px;font-size:0.88rem; background: #1e4a42; border-color: #1e4a42;" id="nav-cta-link">
+            <i class="bi bi-rocket-takeoff"></i> Get Started
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="cms-hero-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <div class="hero-badge" id="cms-hero-badge" style="color: #1e4a42; background: #dff1ee; border: 1px solid rgba(30, 74, 66, 0.15);">
+            <i class="bi bi-stars"></i>
+            Trusted by 2,400+ Retailers & Shop Owners
+          </div>
+          <h1 class="hero-title" style="color: #172a27;">
+            <span id="cms-hero-title1">The Smarter Way to</span><br>
+            <span class="highlight" id="cms-hero-highlight" style="background: linear-gradient(135deg, #1e4a42 0%, #36a892 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Run Your Retail</span><br>
+            <span id="cms-hero-title2">Business</span>
+          </h1>
+          <p class="hero-subtitle" id="cms-hero-subtitle" style="color: #64748b;">
+            ShopFlow gives you a powerful admin dashboard, QR-code product labels, real-time inventory tracking, and an online storefront — all in one beautifully simple platform.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="./register.html" id="cms-cta-primary" class="neu-btn neu-btn-primary d-flex align-items-center gap-2" style="font-size:1rem;padding:14px 36px; background: #1e4a42; color: #fff;">
+              <i class="bi bi-rocket-takeoff"></i>
+              Start Free Today
+            </a>
+            <a href="./store.html" id="cms-cta-secondary" class="neu-btn d-flex align-items-center gap-2" style="font-size:1rem;padding:14px 36px">
+              <i class="bi bi-play-circle"></i>
+              Explore Store
+            </a>
+          </div>
+
+          <!-- Trust Statistics -->
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="num" id="cms-stat1-num" style="color: #1e4a42;">2.4K+</div>
+              <div class="label" id="cms-stat1-lbl">Shop Owners</div>
+            </div>
+            <div class="hero-stat">
+              <div class="num" id="cms-stat2-num" style="color: #1e4a42;">₹48Cr+</div>
+              <div class="label" id="cms-stat2-lbl">Sales Tracked</div>
+            </div>
+            <div class="hero-stat">
+              <div class="num" id="cms-stat3-num" style="color: #1e4a42;">99.9%</div>
+              <div class="label" id="cms-stat3-lbl">Uptime</div>
+            </div>
+            <div class="hero-stat">
+              <div class="num" id="cms-stat4-num" style="color: #1e4a42;">4.9★</div>
+              <div class="label" id="cms-stat4-lbl">Rating</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Visual Mockup matching screenshot -->
+        <div class="col-lg-6">
+          <div class="mockup-app-window">
+            <!-- Header bar of mockup -->
+            <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge" style="background: #1e4a42; color: #fff; padding: 6px 12px; border-radius: 8px;">ShopFlow Hub</span>
+                <span class="badge" style="background: #dff1ee; color: #1e4a42; padding: 6px 12px; border-radius: 8px;">📅 This Month ⌵</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 bg-light px-2 py-1 rounded-pill border">
+                  <div style="width: 22px; height: 22px; border-radius: 50%; background: #1e4a42; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700;">A</div>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: #172a27;">Admin Demo</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini 4 KPI Cards -->
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 border d-flex align-items-center gap-3">
+                  <div class="stat-bubble-icon" style="background: #d8f5ef; color: #1e6356;">
+                    <i class="bi bi-arrow-repeat"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #172a27;">175</div>
+                    <div style="font-size: 0.7rem; color: #7e8e99;">Trades Done</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 border d-flex align-items-center gap-3">
+                  <div class="stat-bubble-icon" style="background: #dcf2f8; color: #156d82;">
+                    <i class="bi bi-wallet2"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #172a27;">45</div>
+                    <div style="font-size: 0.7rem; color: #7e8e99;">Total AUM &rarr;</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 border d-flex align-items-center gap-3">
+                  <div class="stat-bubble-icon" style="background: #daf3ea; color: #1d725f;">
+                    <i class="bi bi-cash-stack"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #172a27;">₹ 2.7L</div>
+                    <div style="font-size: 0.7rem; color: #7e8e99;">Total Revenue &rarr;</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 border d-flex align-items-center gap-3">
+                  <div class="stat-bubble-icon" style="background: #fbf1db; color: #9c7322;">
+                    <i class="bi bi-gear-wide-connected"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #172a27;">78.92%</div>
+                    <div style="font-size: 0.7rem; color: #7e8e99;">Revenue to AUM &rarr;</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini AUM Gradient Bar -->
+            <div class="p-3 bg-white rounded-3 border">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size: 0.75rem; font-weight: 800; color: #172a27;">AUM Distribution</span>
+                <span class="badge" style="background: #dff1ee; color: #1e4a42; font-size: 0.65rem;">Active Portfolio</span>
+              </div>
+              <div class="segmented-gradient-bar" style="height: 16px; margin: 8px 0;">
+                <div class="seg-part-1"></div>
+                <div class="seg-part-2"></div>
+                <div class="seg-part-3"></div>
+                <div class="seg-part-4"></div>
+                <div class="seg-part-5"></div>
+                <div class="seg-part-6"></div>
+              </div>
+              <div class="d-flex justify-content-between text-muted" style="font-size: 0.68rem; font-weight: 600;">
+                <span>● ICICI</span>
+                <span>● HDFC</span>
+                <span>● Aditya Birla</span>
+                <span>● Axis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section (Dynamic from CMS) -->
+  <section class="features-section" id="cms-features-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="section-badge" id="cms-feat-badge" style="background: #dff1ee; color: #1e4a42;">Features</span>
+        <h2 class="section-title" id="cms-feat-title" style="color: #172a27;">Everything a Modern Retailer Needs</h2>
+        <p class="section-subtitle" id="cms-feat-sub" style="color: #64748b;">From QR code labels to full inventory management — ShopFlow is built for serious shop owners.</p>
+      </div>
+
+      <div class="row g-4" id="cms-features-grid"></div>
+    </div>
+  </section>
+
+  <!-- Featured Products Catalog Preview -->
+  <section class="products-section" id="cms-catalog-section" style="background: rgba(30, 74, 66, 0.02); padding: 80px 0;">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="section-badge" style="background: #dff1ee; color: #1e4a42;">Catalog Preview</span>
+        <h2 class="section-title" style="color: #172a27;">Explore Store Inventory</h2>
+        <p class="section-subtitle">Customers can browse, add items to cart, and checkout instantly after logging in.</p>
+      </div>
+
+      <div class="row g-4" id="landing-products">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-success" role="status"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <a href="./store.html" class="neu-btn neu-btn-primary d-inline-flex align-items-center gap-2" style="font-size:1rem;padding:14px 36px; background: #1e4a42;">
+          <i class="bi bi-shop"></i> View All Products & Shop
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section (Dynamic from CMS) -->
+  <section class="testimonials-section" id="cms-testimonials-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="section-badge" id="cms-test-badge" style="background: #dff1ee; color: #1e4a42;">Testimonials</span>
+        <h2 class="section-title" id="cms-test-title" style="color: #172a27;">What Retailers Say</h2>
+      </div>
+
+      <div class="row g-4" id="cms-testimonials-grid"></div>
+    </div>
+  </section>
+
+  <!-- CTA Section (Dynamic from CMS) -->
+  <section class="cta-section" id="cms-cta-section">
+    <div class="container">
+      <div class="cta-card" style="background: linear-gradient(135deg, #1e4a42 0%, #2a6157 100%);">
+        <div class="d-inline-flex align-items-center gap-2 mb-20" style="background:rgba(255,255,255,0.18);border-radius:50px;padding:8px 20px;margin-bottom:20px">
+          <i class="bi bi-stars text-white"></i>
+          <span id="cms-cta-badge" style="color:#ffffff;font-size:0.85rem;font-weight:700">Ready to transform your retail?</span>
+        </div>
+        <h2 id="cms-cta-title" style="font-size:2.2rem;font-weight:800;color:white;margin-bottom:16px;">
+          Start Your Free Account Today
+        </h2>
+        <p id="cms-cta-sub" style="color:rgba(255,255,255,0.85);font-size:1.05rem;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto">
+          Join thousands of retailers already using ShopFlow to manage their stores, generate QR labels, and grow revenue.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <a href="./register.html" id="cms-cta-btn1" style="display:inline-flex;align-items:center;gap:8px;background:white;color:#1e4a42;font-weight:800;padding:14px 36px;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+            <i class="bi bi-person-plus-fill"></i> Create Free Account
+          </a>
+          <a href="./store.html" id="cms-cta-btn2" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);color:white;font-weight:700;padding:14px 36px;border-radius:50px;text-decoration:none;font-size:1rem;border:2px solid rgba(255,255,255,0.4);">
+            <i class="bi bi-eye"></i> Browse as Guest
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (Dynamic from CMS) -->
+  <footer class="landing-footer" id="cms-footer-section">
+    <div class="container">
+      <div class="row g-4 mb-5">
+        <div class="col-lg-5">
+          <a href="./landing.html" class="nav-logo d-flex align-items-center gap-2 mb-3">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: #1e4a42; display: flex; align-items: center; justify-content: center; color: white;">
+              <i class="bi bi-bag-heart-fill"></i>
+            </div>
+            <span style="color: #1e4a42; font-weight: 800; font-size: 1.2rem;" id="footer-brand-name">ShopFlow</span>
+          </a>
+          <p id="cms-footer-about" style="color:#64748b;font-size:0.88rem;line-height:1.7;max-width:400px;">
+            Professional e-commerce and retail management platform. Built for modern shop owners who demand simplicity, reliability, and power.
+          </p>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <h6 style="font-weight:800;color:#172a27;margin-bottom:14px">Platform</h6>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:8px"><a href="./store.html" style="color:#64748b;text-decoration:none;font-size:0.88rem">Store Catalog</a></li>
+            <li style="margin-bottom:8px"><a href="./login.html" style="color:#64748b;text-decoration:none;font-size:0.88rem">Sign In / Dashboard</a></li>
+            <li style="margin-bottom:8px"><a href="./dashboard/qr-generator.html" style="color:#64748b;text-decoration:none;font-size:0.88rem">QR Label Generator</a></li>
+            <li style="margin-bottom:8px"><a href="./dashboard/cms.html" style="color:#64748b;text-decoration:none;font-size:0.88rem">Website CMS</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+          <h6 style="font-weight:800;color:#172a27;margin-bottom:14px">Demo Login Credentials</h6>
+          <div class="p-3 bg-white rounded-3 border">
+            <div style="font-size:0.82rem;color:#172a27;margin-bottom:4px">Admin Email: <strong style="color:#1e4a42">admin@shopflow.com</strong></div>
+            <div style="font-size:0.82rem;color:#172a27">Password: <strong style="color:#1e4a42">admin123</strong></div>
+            <div style="font-size:0.75rem;color:#7e8e99;margin-top:8px">Full permissions: Products, QR Generator, Users, and CMS Builder</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #dce4e6;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <p id="cms-footer-copyright" style="color:#7e8e99;font-size:0.82rem;margin:0">
+          © 2026 ShopFlow Technologies. Built with modern neumorphism for retailers.
+        </p>
+        <div style="display:flex;gap:16px">
+          <a href="#" style="color:#7e8e99;text-decoration:none;font-size:0.82rem">Privacy Policy</a>
+          <a href="#" style="color:#7e8e99;text-decoration:none;font-size:0.82rem">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { ProductStore, CmsStore, AuthStore } from './scripts/store.js';
+
+    // 1. Check logged in user
+    const user = AuthStore.currentUser();
+    const authLink = document.getElementById('nav-auth-link');
+    if (user && user.role === 'admin') {
+      document.getElementById('admin-cms-pill').style.display = 'inline-flex';
+    }
+    if (user && authLink) {
+      authLink.textContent = user.role === 'admin' ? 'Dashboard' : 'My Account';
+      authLink.href = './dashboard/index.html';
+    }
+
+    // 2. Load CMS dynamic content
+    const cms = CmsStore.get();
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[char]);
+    const safeHref = (value, fallback = './landing.html') => {
+      const href = String(value || '').trim();
+      if (!href || /^(javascript|data|vbscript):/i.test(href)) return fallback;
+      try {
+        const url = new URL(href, window.location.href);
+        return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol) ? href : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+
+    const nav = document.getElementById('cms-nav-links');
+    nav.replaceChildren();
+    (cms.navigation || []).filter(item => item.visible !== false).forEach(item => {
+      const link = document.createElement('a');
+      link.className = item.primary ? 'neu-btn neu-btn-primary d-inline-flex align-items-center gap-2' : 'neu-btn d-none d-md-inline-flex align-items-center gap-2';
+      link.href = safeHref(item.href, './store.html');
+      link.style.cssText = 'padding:10px 22px;font-size:0.88rem';
+      const iconClass = item.primary ? 'bi-rocket-takeoff' : item.id === 'nav-signin' ? 'bi-person' : 'bi-shop';
+      link.innerHTML = `<i class="bi ${iconClass}" aria-hidden="true"></i>`;
+      link.append(document.createTextNode(` ${item.label || 'Link'}`));
+      if (item.id === 'nav-signin') link.id = 'nav-auth-link';
+      if (item.primary) link.id = 'nav-cta-link';
+      nav.append(link);
+    });
+
+    // Announcement bar
+    const visibility = cms.visibility || {};
+    if (cms.announcement && cms.announcement.active && visibility.announcement !== false) {
+      const annBar = document.getElementById('cms-announcement');
+      annBar.style.display = 'flex';
+      document.getElementById('cms-ann-badge').textContent = cms.announcement.badge || 'NEW';
+      document.getElementById('cms-ann-text').textContent = cms.announcement.text || '';
+      document.getElementById('cms-ann-link').href = cms.announcement.link || './store.html';
+    }
+
+    // Branding
+    if (cms.branding) {
+      document.title = cms.branding.storeName + ' — ' + cms.branding.tagLine;
+      document.getElementById('nav-brand-name').textContent = cms.branding.storeName;
+      document.getElementById('footer-brand-name').textContent = cms.branding.storeName;
+    }
+
+    const visibilityTargets = {
+      hero: 'cms-hero-section',
+      features: 'cms-features-section',
+      catalog: 'cms-catalog-section',
+      testimonials: 'cms-testimonials-section',
+      cta: 'cms-cta-section',
+      footer: 'cms-footer-section',
+    };
+    Object.entries(visibilityTargets).forEach(([key, id]) => {
+      const element = document.getElementById(id);
+      if (element && visibility[key] === false) element.hidden = true;
+    });
+
+    // Hero
+    if (cms.hero) {
+      document.getElementById('cms-hero-badge').textContent = cms.hero.badge;
+      document.getElementById('cms-hero-title1').textContent = cms.hero.titleLine1;
+      document.getElementById('cms-hero-highlight').textContent = cms.hero.highlight;
+      document.getElementById('cms-hero-title2').textContent = cms.hero.titleLine2;
+      document.getElementById('cms-hero-subtitle').textContent = cms.hero.subtitle;
+      document.getElementById('cms-cta-primary').textContent = cms.hero.ctaPrimaryText;
+      document.getElementById('cms-cta-primary').href = safeHref(cms.hero.ctaPrimaryLink, './register.html');
+      document.getElementById('cms-cta-secondary').textContent = cms.hero.ctaSecondaryText;
+      document.getElementById('cms-cta-secondary').href = safeHref(cms.hero.ctaSecondaryLink, './store.html');
+
+      document.getElementById('cms-stat1-num').textContent = cms.hero.stat1Num;
+      document.getElementById('cms-stat1-lbl').textContent = cms.hero.stat1Label;
+      document.getElementById('cms-stat2-num').textContent = cms.hero.stat2Num;
+      document.getElementById('cms-stat2-lbl').textContent = cms.hero.stat2Label;
+      document.getElementById('cms-stat3-num').textContent = cms.hero.stat3Num;
+      document.getElementById('cms-stat3-lbl').textContent = cms.hero.stat3Label;
+      document.getElementById('cms-stat4-num').textContent = cms.hero.stat4Num;
+      document.getElementById('cms-stat4-lbl').textContent = cms.hero.stat4Label;
+    }
+
+    // Features Section
+    if (cms.features) {
+      document.getElementById('cms-feat-badge').textContent = cms.features.sectionBadge;
+      document.getElementById('cms-feat-title').textContent = cms.features.sectionTitle;
+      document.getElementById('cms-feat-sub').textContent = cms.features.sectionSubtitle;
+
+      const grid = document.getElementById('cms-features-grid');
+      grid.innerHTML = (cms.features.items || []).map(f => `
+        <div class="col-sm-6 col-lg-4">
+          <div class="neu-card feature-card h-100 p-4">
+            <div class="feature-icon mb-3">
+              <i class="bi ${/^bi-[a-z0-9-]+$/.test(f.icon || '') ? f.icon : 'bi-stars'}"></i>
+            </div>
+            <h4>${escapeHtml(f.title)}</h4>
+            <p>${escapeHtml(f.description)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Testimonials
+    if (cms.testimonials) {
+      document.getElementById('cms-test-badge').textContent = cms.testimonials.sectionBadge;
+      document.getElementById('cms-test-title').textContent = cms.testimonials.sectionTitle;
+
+      const tGrid = document.getElementById('cms-testimonials-grid');
+      tGrid.innerHTML = (cms.testimonials.items || []).map(t => {
+        const rating = Math.max(1, Math.min(5, Math.round(Number(t.rating) || 5)));
+        const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+        return `
+          <div class="col-md-4">
+            <div class="neu-card testimonial-card h-100 p-4" style="background: #ffffff; border-radius: 20px;">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="testimonial-avatar">
+                    ${escapeHtml(t.name ? t.name[0] : 'U')}
+                </div>
+                <div>
+                  <div class="testimonial-name">${escapeHtml(t.name)}</div>
+                  <div class="testimonial-shop">${escapeHtml(t.shop)}</div>
+                </div>
+              </div>
+              <div class="testimonial-stars">${stars}</div>
+              <p>&ldquo;${escapeHtml(t.review)}&rdquo;</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // CTA
+    if (cms.cta) {
+      document.getElementById('cms-cta-badge').textContent = cms.cta.badge;
+      document.getElementById('cms-cta-title').textContent = cms.cta.title;
+      document.getElementById('cms-cta-sub').textContent = cms.cta.subtitle;
+      document.getElementById('cms-cta-btn1').textContent = cms.cta.btnPrimaryText;
+      document.getElementById('cms-cta-btn1').href = safeHref(cms.cta.btnPrimaryLink, './register.html');
+      document.getElementById('cms-cta-btn2').textContent = cms.cta.btnSecondaryText;
+      document.getElementById('cms-cta-btn2').href = safeHref(cms.cta.btnSecondaryLink, './store.html');
+    }
+
+    // Footer
+    if (cms.footer) {
+      document.getElementById('cms-footer-about').textContent = cms.footer.about;
+      document.getElementById('cms-footer-copyright').textContent = cms.footer.copyright;
+    }
+
+    // 3. Load catalog preview products
+    const prodContainer = document.getElementById('landing-products');
+    const products = ProductStore.getActive().slice(0, 6);
+
+    prodContainer.innerHTML = products.map(p => {
+      const discount = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
+      return `
+        <div class="col-sm-6 col-lg-4">
+          <div class="neu-card product-card h-100" onclick="window.location.href='./product-detail.html?id=${encodeURIComponent(p.id)}'">
+            <div class="card-img-wrapper" style="height: 200px;">
+              <img src="${safeHref(p.image, './assets/images/product-placeholder.svg')}" alt="${escapeHtml(p.name)}" loading="lazy">
+              ${discount > 0 ? `<span style="position:absolute;top:12px;left:12px;background:#1e4a42;color:white;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:50px">-${discount}% OFF</span>` : ''}
+              <div style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.92);border-radius:8px;padding:4px 10px;font-size:0.7rem;color:${p.stock < 10 ? '#ef4444' : '#1e6356'};font-weight:700">
+                ${p.stock < 10 ? '⚠ Low Stock' : '✓ In Stock'}
+              </div>
+            </div>
+            <div class="card-body p-3">
+              <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">${escapeHtml(p.category)}</div>
+              <div style="font-size: 0.98rem; font-weight: 800; margin-bottom: 6px; line-height: 1.3;">${escapeHtml(p.name)}</div>
+              <div class="d-flex align-items-baseline gap-2 mb-3">
+                <span style="font-size: 1.25rem; font-weight: 900; color: #1e4a42;">₹${p.price.toLocaleString('en-IN')}</span>
+                ${p.originalPrice ? `<span style="font-size: 0.85rem; text-decoration: line-through; color: #94a3b8;">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+              </div>
+              <div class="d-flex align-items-center justify-content-between">
+                <span style="font-size: 0.75rem; color: #7e8e99;">★ ${p.rating} (${p.reviews})</span>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #1e4a42;">View Details &rarr;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  </script>
+</body>
+</html>

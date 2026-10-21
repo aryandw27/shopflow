@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — ShopFlow</title>
+  <meta name="description" content="Browse our full product catalog. Add items to your cart and checkout.">
+  <link rel="stylesheet" href="./styles/main.scss">
+</head>
+<body style="background:var(--neu-bg);min-height:100vh">
+
+  <!-- Header -->
+  <header style="background:var(--neu-bg);border-bottom:1px solid var(--neu-shadow-dark);position:sticky;top:0;z-index:100;padding:0">
+    <div style="box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between py-3">
+          <a href="./landing.html" style="text-decoration:none;font-size:1.3rem;font-weight:800;color:var(--sf-primary)">
+            <i class="bi bi-bag-heart-fill me-2"></i>ShopFlow
+          </a>
+
+          <!-- Search -->
+          <div class="flex-grow-1 mx-4" style="max-width:400px">
+            <div style="position:relative">
+              <i class="bi bi-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--neu-text-light);font-size:0.95rem"></i>
+              <input type="search" id="search-input" placeholder="Search products..." 
+                style="width:100%;padding:10px 16px 10px 40px;border:none;border-radius:50px;background:var(--neu-bg);box-shadow:inset 3px 3px 8px var(--neu-shadow-dark),inset -3px -3px 8px var(--neu-shadow-light);outline:none;font-size:0.88rem;color:var(--neu-text)">
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <!-- Cart -->
+            <a href="./dashboard/cart.html" style="text-decoration:none;position:relative;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--neu-bg);box-shadow:4px 4px 10px var(--neu-shadow-dark),-4px -4px 10px var(--neu-shadow-light);color:var(--neu-text)">
+              <i class="bi bi-cart3" style="font-size:1.1rem"></i>
+              <span id="cart-count" style="position:absolute;top:-4px;right:-4px;background:var(--sf-primary);color:white;font-size:0.6rem;font-weight:700;min-width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center">0</span>
+            </a>
+            <a href="./dashboard/index.html" class="neu-btn" style="padding:8px 18px;font-size:0.85rem;display:flex;align-items:center;gap:6px" id="dash-link">
+              <i class="bi bi-speedometer2"></i> <span id="dash-label">Dashboard</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Filter -->
+  <div style="background:var(--neu-bg);border-bottom:1px solid var(--neu-shadow-dark);padding:12px 0">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3 overflow-auto pb-1" style="scrollbar-width:none">
+        <button class="category-btn active" data-cat="all" onclick="filterCategory('all')" style="white-space:nowrap;border:none;padding:7px 18px;border-radius:50px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:var(--sf-primary);color:white">
+          All Products
+        </button>
+        <div id="category-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container" style="padding:32px 12px">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <div>
+        <h1 style="font-size:1.6rem;font-weight:800;color:var(--neu-text);margin:0">Product Catalog</h1>
+        <p style="font-size:0.88rem;color:var(--neu-text-light);margin:4px 0 0" id="product-count">Loading...</p>
+      </div>
+      <select id="sort-select" onchange="sortProducts(this.value)" style="border:none;border-radius:10px;padding:8px 16px;font-size:0.85rem;background:var(--neu-bg);box-shadow:3px 3px 8px var(--neu-shadow-dark),-3px -3px 8px var(--neu-shadow-light);color:var(--neu-text);outline:none">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating">Top Rated</option>
+        <option value="name">Name A-Z</option>
+      </select>
+    </div>
+
+    <div class="row g-4" id="products-grid">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3" style="color:var(--neu-text-light)">Loading products...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cart Toast -->
+  <div id="cart-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:white;border-radius:14px;padding:14px 24px;box-shadow:0 8px 32px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;z-index:999;transition:transform 0.3s ease;min-width:280px">
+    <div style="width:36px;height:36px;border-radius:50%;background:rgba(79,110,247,0.1);display:flex;align-items:center;justify-content:center;color:var(--sf-primary)"><i class="bi bi-cart-check"></i></div>
+    <div>
+      <div style="font-weight:700;font-size:0.9rem;color:#1e293b" id="toast-title">Added to Cart!</div>
+      <div style="font-size:0.78rem;color:#64748b" id="toast-msg">Item added successfully</div>
+    </div>
+    <a href="./dashboard/cart.html" style="margin-left:auto;background:var(--sf-primary);color:white;text-decoration:none;font-size:0.78rem;font-weight:600;padding:6px 12px;border-radius:8px">View Cart</a>
+  </div>
+
+  <!-- Add to Cart Modal (login prompt) -->
+  <div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border:none;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+        <div class="modal-body text-center p-5">
+          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--sf-primary),#818cf8);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem;color:white">
+            <i class="bi bi-lock"></i>
+          </div>
+          <h4 style="font-weight:800;color:#1e293b;margin-bottom:8px">Sign in Required</h4>
+          <p style="color:#64748b;font-size:0.9rem;margin-bottom:24px">Create an account or sign in to add items to your cart and checkout.</p>
+          <div class="d-flex gap-3 justify-content-center">
+            <a href="./login.html" class="btn btn-primary" style="border-radius:50px;padding:10px 24px;font-weight:600">Sign In</a>
+            <a href="./register.html" class="btn btn-outline-primary" style="border-radius:50px;padding:10px 24px;font-weight:600">Register</a>
+          </div>
+          <button type="button" class="btn btn-link mt-3" data-bs-dismiss="modal" style="color:#64748b;font-size:0.85rem">Continue browsing</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ProductStore, CartStore, AuthStore } from './scripts/store.js';
+    import * as bootstrap from 'bootstrap';
+
+    const user = AuthStore.currentUser();
+    let allProducts = ProductStore.getActive();
+    let filteredProducts = [...allProducts];
+    let currentCategory = 'all';
+    let currentSort = 'default';
+
+    // Update UI for logged-in user
+    if (user) {
+      document.getElementById('dash-label').textContent = 'Dashboard';
+      updateCartBadge();
+    } else {
+      document.getElementById('dash-link').href = './login.html';
+      document.getElementById('dash-label').textContent = 'Sign In';
+    }
+
+    function updateCartBadge() {
+      if (!user) return;
+      const count = CartStore.getItemCount(user.id);
+      const badge = document.getElementById('cart-count');
+      if (count > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = count > 99 ? '99+' : count;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Category buttons
+    const categories = ProductStore.getCategories();
+    document.getElementById('category-btns').innerHTML = categories.map(c => `
+      <button class="category-btn" data-cat="${c}" onclick="filterCategory('${c}')" 
+        style="white-space:nowrap;border:none;padding:7px 18px;border-radius:50px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:var(--neu-bg);color:var(--neu-text-light);box-shadow:3px 3px 8px var(--neu-shadow-dark),-3px -3px 8px var(--neu-shadow-light)">
+        ${c}
+      </button>
+    `).join('');
+
+    window.filterCategory = function(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.category-btn').forEach(b => {
+        const isActive = b.dataset.cat === cat;
+        b.style.background = isActive ? 'var(--sf-primary)' : 'var(--neu-bg)';
+        b.style.color = isActive ? 'white' : 'var(--neu-text-light)';
+        b.style.boxShadow = isActive ? '4px 4px 10px rgba(79,110,247,0.3),-2px -2px 8px var(--neu-shadow-light)' : '3px 3px 8px var(--neu-shadow-dark),-3px -3px 8px var(--neu-shadow-light)';
+      });
+      applyFilters();
+    };
+
+    window.sortProducts = function(val) {
+      currentSort = val;
+      applyFilters();
+    };
+
+    function applyFilters() {
+      let result = currentCategory === 'all' ? [...allProducts] : allProducts.filter(p => p.category === currentCategory);
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      if (q) result = result.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+
+      switch(currentSort) {
+        case 'price-asc': result.sort((a,b) => a.price - b.price); break;
+        case 'price-desc': result.sort((a,b) => b.price - a.price); break;
+        case 'rating': result.sort((a,b) => b.rating - a.rating); break;
+        case 'name': result.sort((a,b) => a.name.localeCompare(b.name)); break;
+      }
+      filteredProducts = result;
+      renderProducts();
+    }
+
+    document.getElementById('search-input').addEventListener('input', applyFilters);
+
+    function formatINR(n) {
+      return '₹' + n.toLocaleString('en-IN');
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      const count = document.getElementById('product-count');
+      count.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`;
+
+      if (filteredProducts.length === 0) {
+        grid.innerHTML = `<div class='col-12 text-center py-5'><i class='bi bi-search' style='font-size:3rem;color:var(--neu-text-light)'></i><p class='mt-3' style='color:var(--neu-text-light)'>No products found</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = filteredProducts.map(p => {
+        const discount = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
+        const stars = '★'.repeat(Math.round(p.rating)) + '☆'.repeat(5 - Math.round(p.rating));
+        return `
+          <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="neu-card product-card h-100">
+              <div class="card-img-wrapper" onclick="window.location.href='./product-detail.html?id=${p.id}'" style="cursor:pointer">
+                <img src="${p.image}" alt="${p.name}" loading="lazy">
+                ${discount > 0 ? `<span style="position:absolute;top:12px;left:12px;background:var(--sf-primary);color:white;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:50px">-${discount}% OFF</span>` : ''}
+                <span style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:0.68rem;color:${p.stock < 10 ? '#ef4444' : '#16a34a'};font-weight:700">${p.stock < 10 ? (p.stock === 0 ? 'Out of Stock' : '⚠ Low Stock') : '✓ In Stock'}</span>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--sf-primary);font-weight:700;margin-bottom:4px">${p.category}</div>
+                <div onclick="window.location.href='./product-detail.html?id=${p.id}'" style="font-size:0.98rem;font-weight:700;color:var(--neu-text);margin-bottom:8px;line-height:1.35;cursor:pointer;flex:1">${p.name}</div>
+                <div style="font-size:0.78rem;color:var(--neu-text-light);margin-bottom:10px">${p.brand}</div>
+                <div style="font-size:0.8rem;color:#f59e0b;margin-bottom:8px">${stars} <span style="color:var(--neu-text-light)">(${p.reviews})</span></div>
+                <div class="d-flex align-items-baseline gap-1 mb-3">
+                  <span style="font-size:1.2rem;font-weight:800;color:var(--sf-primary)">${formatINR(p.price)}</span>
+                  ${p.originalPrice ? `<span style="font-size:0.8rem;text-decoration:line-through;color:var(--neu-text-light)">${formatINR(p.originalPrice)}</span>` : ''}
+                </div>
+                <button onclick="addToCart('${p.id}','${p.name.replace(/'/g,"\'")}')" ${p.stock === 0 ? 'disabled' : ''} 
+                  style="width:100%;border:none;background:${p.stock === 0 ? '#e2e8f0' : 'linear-gradient(135deg,var(--sf-primary),#818cf8)'};color:${p.stock === 0 ? '#94a3b8' : 'white'};font-weight:600;padding:10px;border-radius:50px;cursor:${p.stock === 0 ? 'not-allowed' : 'pointer'};font-size:0.85rem;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px">
+                  <i class="bi ${p.stock === 0 ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
+                  ${p.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.addToCart = function(productId, productName) {
+      if (!user) {
+        const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+        modal.show();
+        return;
+      }
+      CartStore.addItem(user.id, productId);
+      updateCartBadge();
+      showToast(productName);
+    };
+
+    function showToast(name) {
+      const toast = document.getElementById('cart-toast');
+      document.getElementById('toast-msg').textContent = name + ' added to cart';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(100px)'; }, 3000);
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>

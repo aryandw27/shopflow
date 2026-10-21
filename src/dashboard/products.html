@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products – ShopFlow</title>
+  <link rel="stylesheet" href="../styles/main.scss" />
+  <style>
+    /* ── Page-level overrides ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card  { background:#fff; border-radius:12px; padding:1.25rem 1.5rem; box-shadow:0 1px 4px rgba(0,0,0,.07); display:flex; flex-direction:column; gap:.25rem; }
+    .stat-card__value { font-size:1.75rem; font-weight:700; color:#1e293b; }
+    .stat-card__label { font-size:.8rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+
+    .toolbar { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .toolbar input[type=search], .toolbar select { padding:.5rem .75rem; border:1px solid #e2e8f0; border-radius:8px; font-size:.875rem; background:#fff; }
+    .toolbar input[type=search] { flex:1; min-width:180px; }
+
+    /* Table */
+    .data-table-wrap { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); overflow:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.875rem; }
+    th { padding:.75rem 1rem; text-align:left; background:#f8fafc; color:#64748b; font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #e2e8f0; white-space:nowrap; }
+    td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#fafbfc; }
+    .product-cell { display:flex; align-items:center; gap:.75rem; }
+    .product-thumb { width:40px; height:40px; border-radius:8px; object-fit:cover; background:#f1f5f9; flex-shrink:0; }
+    .product-name  { font-weight:600; color:#1e293b; }
+    .product-sku   { font-size:.75rem; color:#94a3b8; }
+    .badge { display:inline-flex; align-items:center; padding:.2rem .6rem; border-radius:999px; font-size:.72rem; font-weight:600; }
+    .badge-active   { background:#dcfce7; color:#16a34a; }
+    .badge-inactive { background:#fee2e2; color:#dc2626; }
+    .badge-low      { background:#fef3c7; color:#d97706; }
+    .badge-out      { background:#fee2e2; color:#dc2626; }
+    .action-btns    { display:flex; gap:.4rem; }
+    .btn-icon { background:none; border:none; cursor:pointer; padding:.35rem; border-radius:6px; color:#64748b; font-size:1rem; transition:background .15s; }
+    .btn-icon:hover { background:#f1f5f9; color:#1e293b; }
+    .btn-icon.danger:hover { background:#fee2e2; color:#dc2626; }
+
+    /* Cards (user view) */
+    .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.25rem; }
+    .product-card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow:hidden; display:flex; flex-direction:column; transition:transform .15s,box-shadow .15s; }
+    .product-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+    .product-card__img { width:100%; height:160px; object-fit:cover; background:#f1f5f9; }
+    .product-card__body { padding:1rem; flex:1; display:flex; flex-direction:column; gap:.4rem; }
+    .product-card__name { font-weight:600; color:#1e293b; font-size:.9rem; }
+    .product-card__cat  { font-size:.75rem; color:#94a3b8; }
+    .product-card__price { font-weight:700; color:#2563eb; font-size:1rem; margin-top:auto; }
+    .product-card__orig  { font-size:.75rem; color:#94a3b8; text-decoration:line-through; }
+    .btn-add-cart { margin-top:.75rem; width:100%; padding:.55rem; border:none; border-radius:8px; background:#2563eb; color:#fff; font-weight:600; font-size:.85rem; cursor:pointer; transition:background .15s; }
+    .btn-add-cart:hover { background:#1d4ed8; }
+    .btn-add-cart:disabled { background:#94a3b8; cursor:not-allowed; }
+
+    /* Modal */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-backdrop.hidden { display:none; }
+    .modal { background:#fff; border-radius:16px; width:100%; max-width:560px; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); display:flex; flex-direction:column; }
+    .modal-header { padding:1.25rem 1.5rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#fff; z-index:1; }
+    .modal-header h2 { font-size:1.1rem; font-weight:700; color:#1e293b; }
+    .modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; color:#94a3b8; padding:0 .25rem; }
+    .modal-close:hover { color:#dc2626; }
+    .modal-body { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-group { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group label { font-size:.8rem; font-weight:600; color:#374151; }
+    .form-group input, .form-group select, .form-group textarea { padding:.5rem .75rem; border:1px solid #e2e8f0; border-radius:8px; font-size:.875rem; width:100%; box-sizing:border-box; transition:border-color .15s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:#2563eb; }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .modal-footer { padding:1rem 1.5rem; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:.75rem; position:sticky; bottom:0; background:#fff; }
+    .btn { padding:.55rem 1.25rem; border:none; border-radius:8px; font-weight:600; font-size:.875rem; cursor:pointer; transition:background .15s; }
+    .btn-primary { background:#2563eb; color:#fff; }
+    .btn-primary:hover { background:#1d4ed8; }
+    .btn-secondary { background:#f1f5f9; color:#374151; }
+    .btn-secondary:hover { background:#e2e8f0; }
+    .btn-danger { background:#fee2e2; color:#dc2626; }
+    .btn-danger:hover { background:#fecaca; }
+    .btn-add { background:#2563eb; color:#fff; }
+    .btn-add:hover { background:#1d4ed8; }
+
+    /* Confirm dialog */
+    .confirm-dialog { max-width:380px; }
+    .confirm-dialog .modal-body { text-align:center; }
+    .confirm-dialog .modal-body p { color:#475569; font-size:.9rem; }
+    .empty-state { text-align:center; padding:3rem 1rem; color:#94a3b8; }
+    .empty-state svg { width:64px; height:64px; margin-bottom:1rem; opacity:.4; }
+    .empty-state p { font-size:1rem; margin-bottom:1.5rem; }
+  </style>
+</head>
+<body>
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+
+    <!-- ── ADMIN VIEW ── -->
+    <div id="admin-view">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem;">
+        <div>
+          <h1 style="font-size:1.5rem;font-weight:700;color:#1e293b;margin:0">Products</h1>
+          <p style="color:#64748b;font-size:.875rem;margin:.25rem 0 0">Manage your product catalogue</p>
+        </div>
+        <button class="btn btn-add" id="btn-add-product">+ Add Product</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="admin-stats"></div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <input type="search" id="admin-search" placeholder="🔍  Search by name or SKU…" />
+        <select id="admin-cat-filter">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="data-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>SKU</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-product-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── USER VIEW ── -->
+    <div id="user-view" style="display:none;">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem;">
+        <div>
+          <h1 style="font-size:1.5rem;font-weight:700;color:#1e293b;margin:0">Shop</h1>
+          <p style="color:#64748b;font-size:.875rem;margin:.25rem 0 0">Browse our product collection</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="user-search" placeholder="🔍  Search products…" />
+        <select id="user-cat-filter">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div class="product-grid" id="user-product-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ─────────── ADD / EDIT PRODUCT MODAL ─────────── -->
+<div class="modal-backdrop hidden" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="product-modal-title">Add Product</h2>
+      <button class="modal-close" id="product-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-product-id" />
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input type="text" id="field-name" placeholder="e.g. Wireless Headphones" required />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="field-desc" placeholder="Short product description…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" id="field-price" min="0" step="0.01" placeholder="999" required />
+        </div>
+        <div class="form-group">
+          <label>Original Price (₹)</label>
+          <input type="number" id="field-orig-price" min="0" step="0.01" placeholder="1299" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="field-category">
+            <option value="">Select…</option>
+            <option>Electronics</option>
+            <option>Clothing</option>
+            <option>Books</option>
+            <option>Home & Kitchen</option>
+            <option>Sports</option>
+            <option>Beauty</option>
+            <option>Toys</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" id="field-brand" placeholder="e.g. Sony" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU *</label>
+          <input type="text" id="field-sku" placeholder="e.g. SKU-0001" required />
+        </div>
+        <div class="form-group">
+          <label>Stock Qty *</label>
+          <input type="number" id="field-stock" min="0" placeholder="50" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="field-weight" min="0" step="0.01" placeholder="0.5" />
+        </div>
+        <div class="form-group">
+          <label>Dimensions (L×W×H cm)</label>
+          <input type="text" id="field-dimensions" placeholder="20×15×5" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="url" id="field-image" placeholder="https://…" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="field-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="product-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="product-modal-save">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── CONFIRM DELETE MODAL ─────────── -->
+<div class="modal-backdrop hidden" id="confirm-modal">
+  <div class="modal confirm-dialog">
+    <div class="modal-header">
+      <h2>Confirm Delete</h2>
+      <button class="modal-close" id="confirm-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg">Are you sure you want to delete this product? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initDashboardShell, formatINR, formatDate, getStatusColor, getStatusBg, showToast } from '../scripts/dashboard-shell.js';
+  import { ProductStore, CartStore, AuthStore } from '../scripts/store.js';
+
+  initDashboardShell({ activePage: 'products', pageTitle: 'Products' });
+
+  /* ── helpers ── */
+  const $ = id => document.getElementById(id);
+
+  function stockBadge(qty) {
+    if (qty === 0) return '<span class="badge badge-out">Out of Stock</span>';
+    if (qty < 10) return `<span class="badge badge-low">Low (${qty})</span>`;
+    return `<span class="badge" style="background:#dbeafe;color:#1d4ed8">${qty}</span>`;
+  }
+
+  function statusBadge(s) {
+    return s === 'active'
+      ? '<span class="badge badge-active">Active</span>'
+      : '<span class="badge badge-inactive">Inactive</span>';
+  }
+
+  /* ── Role check ── */
+  const user = AuthStore.current();
+  const isAdmin = user?.role === 'admin';
+
+  if (!isAdmin) {
+    $('admin-view').style.display = 'none';
+    $('user-view').style.display  = '';
+  }
+
+  /* ═══════════════════════════════
+       ADMIN VIEW
+  ═══════════════════════════════ */
+  function renderAdminStats(products) {
+    const total    = products.length;
+    const active   = products.filter(p => p.status === 'active').length;
+    const low      = products.filter(p => p.stock > 0 && p.stock < 10).length;
+    const out      = products.filter(p => p.stock === 0).length;
+    $('admin-stats').innerHTML = `
+      <div class="stat-card"><span class="stat-card__value">${total}</span><span class="stat-card__label">Total Products</span></div>
+      <div class="stat-card"><span class="stat-card__value">${active}</span><span class="stat-card__label">Active</span></div>
+      <div class="stat-card"><span class="stat-card__value">${low}</span><span class="stat-card__label">Low Stock</span></div>
+      <div class="stat-card"><span class="stat-card__value">${out}</span><span class="stat-card__label">Out of Stock</span></div>
+    `;
+  }
+
+  function renderAdminTable(products) {
+    const tbody = $('admin-product-tbody');
+    if (!products.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No products found.</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr data-id="${p.id}">
+        <td>
+          <div class="product-cell">
+            <img class="product-thumb" src="${p.image || 'https://placehold.co/40x40?text=P'}" alt="${p.name}" onerror="this.src='https://placehold.co/40x40?text=P'" />
+            <div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-sku">${p.brand || '–'}</div>
+            </div>
+          </div>
+        </td>
+        <td>${p.category || '–'}</td>
+        <td style="font-family:monospace;font-size:.8rem;color:#475569">${p.sku || '–'}</td>
+        <td>${stockBadge(p.stock ?? 0)}</td>
+        <td>
+          <div style="font-weight:600;color:#1e293b">${formatINR(p.price)}</div>
+          ${p.originalPrice ? `<div style="font-size:.75rem;color:#94a3b8;text-decoration:line-through">${formatINR(p.originalPrice)}</div>` : ''}
+        </td>
+        <td>${statusBadge(p.status)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-icon" title="Edit" onclick="openEdit('${p.id}')">✏️</button>
+            <button class="btn-icon" title="Toggle Status" onclick="toggleStatus('${p.id}')">🔄</button>
+            <button class="btn-icon" title="QR Generator" onclick="goQR('${p.id}')">📱</button>
+            <button class="btn-icon danger" title="Delete" onclick="confirmDelete('${p.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function getAdminFiltered() {
+    const q   = $('admin-search').value.trim().toLowerCase();
+    const cat = $('admin-cat-filter').value;
+    return ProductStore.getAll().filter(p => {
+      const matchQ   = !q || p.name.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q);
+      const matchCat = !cat || p.category === cat;
+      return matchQ && matchCat;
+    });
+  }
+
+  function refreshAdmin() {
+    const all = ProductStore.getAll();
+    renderAdminStats(all);
+    renderAdminTable(getAdminFiltered());
+  }
+
+  function populateCategoryFilter(selectId) {
+    const cats = [...new Set(ProductStore.getAll().map(p => p.category).filter(Boolean))].sort();
+    const sel  = $(selectId);
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option ${c===prev?'selected':''}>${c}</option>`).join('');
+  }
+
+  /* ── Modal helpers ── */
+  function openModal(id)  { $(id).classList.remove('hidden'); }
+  function closeModal(id) { $(id).classList.add('hidden'); }
+
+  function clearForm() {
+    ['edit-product-id','field-name','field-desc','field-price','field-orig-price',
+     'field-brand','field-sku','field-stock','field-weight','field-dimensions','field-image']
+      .forEach(id => { $(id).value = ''; });
+    $('field-category').value = '';
+    $('field-status').value   = 'active';
+  }
+
+  window.openEdit = function(id) {
+    const p = ProductStore.getById(id);
+    if (!p) return;
+    $('product-modal-title').textContent = 'Edit Product';
+    $('edit-product-id').value    = p.id;
+    $('field-name').value         = p.name || '';
+    $('field-desc').value         = p.description || '';
+    $('field-price').value        = p.price || '';
+    $('field-orig-price').value   = p.originalPrice || '';
+    $('field-category').value     = p.category || '';
+    $('field-brand').value        = p.brand || '';
+    $('field-sku').value          = p.sku || '';
+    $('field-stock').value        = p.stock ?? '';
+    $('field-weight').value       = p.weight || '';
+    $('field-dimensions').value   = p.dimensions || '';
+    $('field-image').value        = p.image || '';
+    $('field-status').value       = p.status || 'active';
+    openModal('product-modal');
+  };
+
+  window.toggleStatus = function(id) {
+    const p = ProductStore.getById(id);
+    if (!p) return;
+    ProductStore.update(id, { status: p.status === 'active' ? 'inactive' : 'active' });
+    refreshAdmin();
+    showToast(`Product ${p.name} status updated.`, 'success');
+  };
+
+  window.goQR = function(id) {
+    window.location.href = `qr-generator.html?productId=${id}`;
+  };
+
+  let pendingDeleteId = null;
+  window.confirmDelete = function(id) {
+    const p = ProductStore.getById(id);
+    $('confirm-msg').textContent = `Are you sure you want to delete "${p?.name || 'this product'}"? This action cannot be undone.`;
+    pendingDeleteId = id;
+    openModal('confirm-modal');
+  };
+
+  $('confirm-ok').addEventListener('click', () => {
+    if (pendingDeleteId) {
+      ProductStore.delete(pendingDeleteId);
+      pendingDeleteId = null;
+      closeModal('confirm-modal');
+      populateCategoryFilter('admin-cat-filter');
+      refreshAdmin();
+      showToast('Product deleted.', 'error');
+    }
+  });
+  $('confirm-cancel').addEventListener('click', () => closeModal('confirm-modal'));
+  $('confirm-modal-close').addEventListener('click', () => closeModal('confirm-modal'));
+
+  /* Add Product button */
+  $('btn-add-product').addEventListener('click', () => {
+    clearForm();
+    $('product-modal-title').textContent = 'Add Product';
+    openModal('product-modal');
+  });
+  $('product-modal-close').addEventListener('click',  () => closeModal('product-modal'));
+  $('product-modal-cancel').addEventListener('click', () => closeModal('product-modal'));
+
+  /* Save product */
+  $('product-modal-save').addEventListener('click', () => {
+    const name  = $('field-name').value.trim();
+    const price = parseFloat($('field-price').value);
+    const sku   = $('field-sku').value.trim();
+    const stock = parseInt($('field-stock').value, 10);
+    const cat   = $('field-category').value;
+
+    if (!name || isNaN(price) || !sku || isNaN(stock) || !cat) {
+      showToast('Please fill in all required fields.', 'warning');
+      return;
+    }
+
+    const payload = {
+      name,
+      description:   $('field-desc').value.trim(),
+      price,
+      originalPrice: parseFloat($('field-orig-price').value) || null,
+      category:      cat,
+      brand:         $('field-brand').value.trim(),
+      sku,
+      stock,
+      weight:        parseFloat($('field-weight').value) || null,
+      dimensions:    $('field-dimensions').value.trim(),
+      image:         $('field-image').value.trim(),
+      status:        $('field-status').value,
+    };
+
+    const editId = $('edit-product-id').value;
+    if (editId) {
+      ProductStore.update(editId, payload);
+      showToast('Product updated successfully.', 'success');
+    } else {
+      ProductStore.create(payload);
+      showToast('Product added successfully.', 'success');
+    }
+
+    closeModal('product-modal');
+    populateCategoryFilter('admin-cat-filter');
+    refreshAdmin();
+  });
+
+  /* Search & Filter */
+  $('admin-search').addEventListener('input',     () => renderAdminTable(getAdminFiltered()));
+  $('admin-cat-filter').addEventListener('change',() => renderAdminTable(getAdminFiltered()));
+
+  /* ═══════════════════════════════
+       USER VIEW
+  ═══════════════════════════════ */
+  function renderUserGrid(products) {
+    const grid = $('user-product-grid');
+    if (!products.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>No products found.</p></div>`;
+      return;
+    }
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <img class="product-card__img" src="${p.image || 'https://placehold.co/220x160?text=Product'}" alt="${p.name}" onerror="this.src='https://placehold.co/220x160?text=Product'" />
+        <div class="product-card__body">
+          <div class="product-card__name">${p.name}</div>
+          <div class="product-card__cat">${p.category || ''}</div>
+          <div style="display:flex;align-items:baseline;gap:.5rem;margin-top:auto;">
+            <span class="product-card__price">${formatINR(p.price)}</span>
+            ${p.originalPrice ? `<span class="product-card__orig">${formatINR(p.originalPrice)}</span>` : ''}
+          </div>
+          <button class="btn-add-cart"
+            ${(p.stock === 0 || p.status !== 'active') ? 'disabled' : ''}
+            onclick="addToCart('${p.id}')">
+            ${p.stock === 0 ? 'Out of Stock' : '🛒 Add to Cart'}
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function getUserFiltered() {
+    const q   = $('user-search').value.trim().toLowerCase();
+    const cat = $('user-cat-filter').value;
+    return ProductStore.getAll().filter(p => {
+      if (p.status !== 'active') return false;
+      const matchQ   = !q || p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+      const matchCat = !cat || p.category === cat;
+      return matchQ && matchCat;
+    });
+  }
+
+  window.addToCart = function(productId) {
+    CartStore.addItem(productId, 1);
+    showToast('Added to cart!', 'success');
+  };
+
+  $('user-search').addEventListener('input',     () => renderUserGrid(getUserFiltered()));
+  $('user-cat-filter').addEventListener('change',() => renderUserGrid(getUserFiltered()));
+
+  /* ── Init ── */
+  if (isAdmin) {
+    populateCategoryFilter('admin-cat-filter');
+    refreshAdmin();
+  } else {
+    populateCategoryFilter('user-cat-filter');
+    renderUserGrid(getUserFiltered());
+  }
+</script>
+</body>
+</html>

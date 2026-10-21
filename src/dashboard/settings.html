@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings – ShopFlow</title>
+  <link rel="stylesheet" href="../styles/main.scss" />
+  <style>
+    .settings-layout { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
+    @media(max-width:900px) { .settings-layout { grid-template-columns:1fr; } }
+
+    .settings-card { background:#fff; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow:hidden; }
+    .settings-card__header { padding:1.25rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+    .settings-card__header h2 { font-size:1rem; font-weight:700; color:#1e293b; margin:0; }
+    .settings-card__header p  { font-size:.8rem; color:#94a3b8; margin:.25rem 0 0; }
+    .settings-card__body { padding:1.5rem; display:flex; flex-direction:column; gap:1.1rem; }
+    .settings-card__footer { padding:1rem 1.5rem; border-top:1px solid #f1f5f9; display:flex; justify-content:flex-end; }
+
+    /* Avatar */
+    .profile-avatar-row { display:flex; align-items:center; gap:1.25rem; margin-bottom:.25rem; }
+    .avatar-circle { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#2563eb,#7c3aed); display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:#fff; flex-shrink:0; user-select:none; }
+    .avatar-info { flex:1; }
+    .avatar-info__name { font-size:1.1rem; font-weight:700; color:#1e293b; }
+    .avatar-info__email { font-size:.82rem; color:#64748b; margin-top:.15rem; }
+    .role-badge { display:inline-flex; align-items:center; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:700; margin-top:.4rem; }
+    .role-admin { background:#ede9fe; color:#7c3aed; }
+    .role-user  { background:#dbeafe; color:#2563eb; }
+
+    /* Form */
+    .form-group { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group label { font-size:.8rem; font-weight:600; color:#374151; }
+    .form-group input { padding:.55rem .75rem; border:1px solid #e2e8f0; border-radius:8px; font-size:.875rem; width:100%; box-sizing:border-box; transition:border-color .15s; }
+    .form-group input:focus { outline:none; border-color:#2563eb; }
+    .form-group input[readonly] { background:#f8fafc; color:#64748b; cursor:not-allowed; }
+    .form-group .hint { font-size:.72rem; color:#94a3b8; margin-top:.15rem; }
+
+    .btn { padding:.55rem 1.25rem; border:none; border-radius:8px; font-weight:600; font-size:.875rem; cursor:pointer; transition:background .15s; }
+    .btn-primary   { background:#2563eb; color:#fff; }
+    .btn-primary:hover  { background:#1d4ed8; }
+    .btn-warning   { background:#f59e0b; color:#fff; }
+    .btn-warning:hover  { background:#d97706; }
+    .btn-secondary { background:#f1f5f9; color:#374151; }
+    .btn-secondary:hover { background:#e2e8f0; }
+
+    /* Toggle */
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:.5rem 0; }
+    .toggle-row__info h4 { font-size:.9rem; font-weight:600; color:#1e293b; margin:0 0 .15rem; }
+    .toggle-row__info p  { font-size:.78rem; color:#94a3b8; margin:0; }
+    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-track { position:absolute; inset:0; background:#e2e8f0; border-radius:999px; transition:background .2s; cursor:pointer; }
+    .toggle input:checked + .toggle-track { background:#2563eb; }
+    .toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); pointer-events:none; }
+    .toggle input:checked ~ .toggle-thumb { transform:translateX(20px); }
+
+    /* Account info */
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .info-item { background:#f8fafc; border-radius:10px; padding:.9rem 1rem; }
+    .info-item__label { font-size:.72rem; color:#94a3b8; text-transform:uppercase; font-weight:600; letter-spacing:.06em; margin-bottom:.35rem; }
+    .info-item__value { font-size:1.1rem; font-weight:700; color:#1e293b; }
+
+    /* Password strength */
+    .pwd-strength { height:4px; border-radius:2px; margin-top:.4rem; background:#e2e8f0; overflow:hidden; }
+    .pwd-strength__bar { height:100%; border-radius:2px; transition:width .3s, background .3s; width:0%; }
+    .pwd-strength__label { font-size:.72rem; color:#94a3b8; margin-top:.25rem; }
+
+    .divider { border:none; border-top:1px solid #f1f5f9; margin:0; }
+  </style>
+</head>
+<body>
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+
+    <div class="page-header" style="margin-bottom:1.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#1e293b;margin:0">Settings</h1>
+      <p style="color:#64748b;font-size:.875rem;margin:.25rem 0 0">Manage your profile and preferences</p>
+    </div>
+
+    <div class="settings-layout">
+
+      <!-- ── LEFT COLUMN ── -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+        <!-- Profile Card -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2>Profile</h2>
+            <p>Your personal information</p>
+          </div>
+          <div class="settings-card__body">
+            <!-- Avatar row -->
+            <div class="profile-avatar-row">
+              <div class="avatar-circle" id="avatar-circle">?</div>
+              <div class="avatar-info">
+                <div class="avatar-info__name" id="avatar-name">–</div>
+                <div class="avatar-info__email" id="avatar-email">–</div>
+                <div id="avatar-role-badge"></div>
+              </div>
+            </div>
+            <hr class="divider" />
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="profile-name" placeholder="Your full name" />
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="profile-email" readonly />
+              <span class="hint">Email cannot be changed.</span>
+            </div>
+          </div>
+          <div class="settings-card__footer">
+            <button class="btn btn-primary" id="btn-save-profile">Save Profile</button>
+          </div>
+        </div>
+
+        <!-- Account Info Card -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2>Account Info</h2>
+            <p>Your activity summary</p>
+          </div>
+          <div class="settings-card__body">
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-item__label">Member Since</div>
+                <div class="info-item__value" id="info-since">–</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">Total Orders</div>
+                <div class="info-item__value" id="info-orders">–</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">Total Spent</div>
+                <div class="info-item__value" id="info-spent">–</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">Account Role</div>
+                <div class="info-item__value" id="info-role">–</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT COLUMN ── -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+        <!-- Change Password Card -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2>Change Password</h2>
+            <p>Update your login credentials</p>
+          </div>
+          <div class="settings-card__body">
+            <div class="form-group">
+              <label>Current Password *</label>
+              <input type="password" id="pwd-current" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label>New Password *</label>
+              <input type="password" id="pwd-new" placeholder="Min. 8 characters" autocomplete="new-password" />
+              <div class="pwd-strength"><div class="pwd-strength__bar" id="pwd-bar"></div></div>
+              <div class="pwd-strength__label" id="pwd-label"></div>
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password *</label>
+              <input type="password" id="pwd-confirm" placeholder="Re-enter new password" autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="settings-card__footer">
+            <button class="btn btn-warning" id="btn-change-pwd">Change Password</button>
+          </div>
+        </div>
+
+        <!-- Preferences Card -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2>Preferences</h2>
+            <p>Notification and display settings</p>
+          </div>
+          <div class="settings-card__body">
+            <div class="toggle-row">
+              <div class="toggle-row__info">
+                <h4>Email Notifications</h4>
+                <p>Receive order updates and offers via email</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="pref-email-notif" checked />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+            <hr class="divider" />
+            <div class="toggle-row">
+              <div class="toggle-row__info">
+                <h4>Order Alerts</h4>
+                <p>Get notified when your order status changes</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="pref-order-alerts" checked />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+            <hr class="divider" />
+            <div class="toggle-row">
+              <div class="toggle-row__info">
+                <h4>Promotional Emails</h4>
+                <p>Deals, discounts and new arrivals</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="pref-promo" />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-card__footer">
+            <button class="btn btn-secondary" id="btn-save-prefs">Save Preferences</button>
+          </div>
+        </div>
+
+        <!-- Danger Zone (admin only) -->
+        <div class="settings-card" id="danger-zone" style="display:none;">
+          <div class="settings-card__header">
+            <h2 style="color:#dc2626">Danger Zone</h2>
+            <p>Irreversible account actions</p>
+          </div>
+          <div class="settings-card__body">
+            <p style="font-size:.875rem;color:#64748b">Resetting or deleting data cannot be undone. Proceed with caution.</p>
+            <button class="btn" style="background:#fee2e2;color:#dc2626;width:100%;" id="btn-reset-data">🗑️ Reset All Store Data</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+  import { initDashboardShell, formatINR, formatDate, getStatusColor, getStatusBg, showToast } from '../scripts/dashboard-shell.js';
+  import { AuthStore, UserStore, OrderStore } from '../scripts/store.js';
+
+  initDashboardShell({ activePage: 'settings', pageTitle: 'Settings' });
+
+  const $ = id => document.getElementById(id);
+
+  /* ── Load user ── */
+  const currentUser = AuthStore.current();
+  if (!currentUser) {
+    window.location.href = '../index.html';
+  }
+
+  function getInitials(name) {
+    if (!name) return '?';
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function renderProfile() {
+    const u = AuthStore.current();
+    $('avatar-circle').textContent  = getInitials(u?.name);
+    $('avatar-name').textContent    = u?.name  || '–';
+    $('avatar-email').textContent   = u?.email || '–';
+    $('profile-name').value         = u?.name  || '';
+    $('profile-email').value        = u?.email || '';
+
+    const isAdmin = u?.role === 'admin';
+    $('avatar-role-badge').innerHTML = `<span class="role-badge ${isAdmin ? 'role-admin' : 'role-user'}">${isAdmin ? '🛡️ Admin' : '👤 User'}</span>`;
+    $('info-role').textContent       = isAdmin ? 'Administrator' : 'Customer';
+
+    /* Account stats */
+    const memberSince = u?.createdAt ? new Date(u.createdAt).getFullYear() : '–';
+    $('info-since').textContent = memberSince;
+
+    const userOrders  = OrderStore.getByUser(u?.id) || [];
+    const totalOrders = userOrders.length;
+    const totalSpent  = userOrders
+      .filter(o => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+
+    $('info-orders').textContent = totalOrders;
+    $('info-spent').textContent  = formatINR(totalSpent);
+
+    /* Danger zone for admin */
+    if (isAdmin) $('danger-zone').style.display = '';
+  }
+
+  renderProfile();
+
+  /* ── Save Profile ── */
+  $('btn-save-profile').addEventListener('click', () => {
+    const name = $('profile-name').value.trim();
+    if (!name) {
+      showToast('Name cannot be empty.', 'warning');
+      return;
+    }
+    const u = AuthStore.current();
+    UserStore.update(u.id, { name });
+    AuthStore.updateCurrentUser({ name });
+    renderProfile();
+    showToast('Profile updated successfully!', 'success');
+  });
+
+  /* ── Password strength ── */
+  $('pwd-new').addEventListener('input', () => {
+    const pwd = $('pwd-new').value;
+    let score = 0;
+    if (pwd.length >= 8)              score++;
+    if (/[A-Z]/.test(pwd))           score++;
+    if (/[0-9]/.test(pwd))           score++;
+    if (/[^A-Za-z0-9]/.test(pwd))    score++;
+
+    const configs = [
+      { width:'0%',   bg:'#e2e8f0', label:'' },
+      { width:'25%',  bg:'#ef4444', label:'Weak' },
+      { width:'50%',  bg:'#f97316', label:'Fair' },
+      { width:'75%',  bg:'#f59e0b', label:'Good' },
+      { width:'100%', bg:'#22c55e', label:'Strong' },
+    ];
+    const c = configs[score];
+    $('pwd-bar').style.width      = c.width;
+    $('pwd-bar').style.background = c.bg;
+    $('pwd-label').textContent    = c.label;
+    $('pwd-label').style.color    = c.bg;
+  });
+
+  /* ── Change Password ── */
+  $('btn-change-pwd').addEventListener('click', () => {
+    const current  = $('pwd-current').value;
+    const newPwd   = $('pwd-new').value;
+    const confirm  = $('pwd-confirm').value;
+    const u        = AuthStore.current();
+
+    if (!current || !newPwd || !confirm) {
+      showToast('Please fill in all password fields.', 'warning');
+      return;
+    }
+    if (current !== u.password) {
+      showToast('Current password is incorrect.', 'error');
+      return;
+    }
+    if (newPwd.length < 8) {
+      showToast('New password must be at least 8 characters.', 'warning');
+      return;
+    }
+    if (newPwd !== confirm) {
+      showToast('New passwords do not match.', 'warning');
+      return;
+    }
+
+    UserStore.update(u.id, { password: newPwd });
+    AuthStore.updateCurrentUser({ password: newPwd });
+    $('pwd-current').value = '';
+    $('pwd-new').value     = '';
+    $('pwd-confirm').value = '';
+    $('pwd-bar').style.width = '0%';
+    $('pwd-label').textContent = '';
+    showToast('Password changed successfully!', 'success');
+  });
+
+  /* ── Preferences (UI only) ── */
+  $('btn-save-prefs').addEventListener('click', () => {
+    showToast('Preferences saved!', 'success');
+  });
+
+  /* ── Danger zone ── */
+  const dangerBtn = $('btn-reset-data');
+  if (dangerBtn) {
+    dangerBtn.addEventListener('click', () => {
+      if (confirm('⚠️ This will permanently reset ALL store data (products, orders, users). Continue?')) {
+        if (confirm('Are you ABSOLUTELY sure? This cannot be undone.')) {
+          /* Clear localStorage keys used by the store */
+          ['sf_products','sf_orders','sf_users','sf_cart'].forEach(k => localStorage.removeItem(k));
+          showToast('Store data reset. Reloading…', 'info');
+          setTimeout(() => window.location.reload(), 1500);
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

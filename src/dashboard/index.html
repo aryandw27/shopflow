@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Hub — ShopFlow</title>
+  <link rel="stylesheet" href="../styles/main.scss">
+  <style>
+    /* World Map Vector Styling matching screenshot */
+    .world-map-svg {
+      width: 100%;
+      max-height: 190px;
+      opacity: 0.85;
+    }
+    .spread-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.84rem;
+      border-bottom: 1px dashed #f0f4f5;
+    }
+    .spread-list-item:last-child {
+      border-bottom: none;
+    }
+    .spread-rank-name {
+      font-weight: 600;
+      color: #172a27;
+    }
+    .spread-val {
+      font-weight: 700;
+      color: #64748b;
+    }
+    .pill-tab-line {
+      display: inline-flex;
+      gap: 20px;
+      border-bottom: 2px solid #edf1f3;
+      margin-bottom: 16px;
+    }
+    .pill-tab-item {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #7e8e99;
+      padding-bottom: 8px;
+      cursor: pointer;
+      position: relative;
+      border: none;
+      background: transparent;
+    }
+    .pill-tab-item.active {
+      color: #1e4a42;
+    }
+    .pill-tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: #1e4a42;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="app-canvas-mode dashboard-home">
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+    <div class="dashboard-home-content">
+      <section class="dashboard-kpis" aria-label="Store performance">
+        <article class="dashboard-kpi">
+          <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="bi bi-bag-check"></i></span><svg class="dashboard-sparkline sparkline-coral" viewBox="0 0 64 26" aria-hidden="true"><path d="M2 5 C12 5 12 20 21 19 S31 7 39 12 S50 24 62 8"/></svg></div>
+          <span class="dashboard-kpi-label">Orders</span>
+          <strong id="stat-trades">0</strong>
+          <span class="dashboard-kpi-change"><i class="bi bi-arrow-up-right"></i> All order activity</span>
+        </article>
+        <article class="dashboard-kpi">
+          <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon kpi-icon-violet"><i class="bi bi-box-seam"></i></span><svg class="dashboard-sparkline sparkline-green" viewBox="0 0 64 26" aria-hidden="true"><path d="M2 21 C12 20 11 13 21 17 S31 19 38 9 S51 14 62 3"/></svg></div>
+          <span class="dashboard-kpi-label">Products</span>
+          <strong id="stat-aum">0</strong>
+          <span class="dashboard-kpi-change"><i class="bi bi-check2-square"></i> In your catalogue</span>
+        </article>
+        <article class="dashboard-kpi">
+          <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon kpi-icon-blue"><i class="bi bi-currency-rupee"></i></span><svg class="dashboard-sparkline sparkline-coral" viewBox="0 0 64 26" aria-hidden="true"><path d="M2 6 C11 7 13 21 22 18 S32 9 41 13 S53 22 62 7"/></svg></div>
+          <span class="dashboard-kpi-label">Revenue</span>
+          <strong id="stat-rev">₹0</strong>
+          <span class="dashboard-kpi-change"><i class="bi bi-graph-up-arrow"></i> Excluding cancelled orders</span>
+        </article>
+        <article class="dashboard-kpi">
+          <div class="dashboard-kpi-top"><span class="dashboard-kpi-icon kpi-icon-amber"><i class="bi bi-people"></i></span><svg class="dashboard-sparkline sparkline-green" viewBox="0 0 64 26" aria-hidden="true"><path d="M2 20 C12 18 11 10 22 15 S31 16 40 8 S52 12 62 3"/></svg></div>
+          <span class="dashboard-kpi-label">Customers</span>
+          <strong id="stat-customers">0</strong>
+          <span class="dashboard-kpi-change"><i class="bi bi-person-check"></i> Registered accounts</span>
+        </article>
+      </section>
+
+      <section class="dashboard-overview-grid" aria-label="Store overview">
+        <article class="dashboard-panel dashboard-sales-panel">
+          <header class="dashboard-panel-header">
+            <div><span class="dashboard-panel-eyebrow">PERFORMANCE</span><h2><i class="bi bi-grid-3x3-gap"></i> Order activity</h2></div>
+            <a href="./orders.html" class="dashboard-panel-link">View orders <i class="bi bi-arrow-up-right"></i></a>
+          </header>
+          <div class="dashboard-chart-summary"><strong id="chart-order-total">0</strong><span>orders in your store</span></div>
+          <div class="dashboard-chart-wrap">
+            <div class="dashboard-chart-ylabels" aria-hidden="true"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+            <svg id="orders-chart" viewBox="0 0 620 190" role="img" aria-label="Order totals over recent activity">
+              <defs><linearGradient id="orders-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5c83e8" stop-opacity=".2"/><stop offset="100%" stop-color="#5c83e8" stop-opacity="0"/></linearGradient></defs>
+              <path class="dashboard-chart-area" d="M0 155 C80 145 88 115 155 126 S230 155 310 88 S425 120 480 70 S560 105 620 35 L620 190 L0 190 Z"/>
+              <path class="dashboard-chart-line" d="M0 155 C80 145 88 115 155 126 S230 155 310 88 S425 120 480 70 S560 105 620 35"/>
+              <path class="dashboard-chart-line dashboard-chart-line-secondary" d="M0 120 C72 123 94 145 155 139 S235 95 310 121 S416 148 480 119 S555 133 620 96"/>
+              <circle cx="480" cy="70" r="5" class="dashboard-chart-point"/>
+            </svg>
+          </div>
+          <div class="dashboard-chart-xlabels" aria-hidden="true"><span>Earlier</span><span>Recent</span><span>Latest</span></div>
+          <div class="dashboard-chart-legend"><span><i class="legend-dot legend-dot-blue"></i> Orders</span><span><i class="legend-dot legend-dot-sage"></i> Fulfilled</span></div>
+        </article>
+
+        <article class="dashboard-panel dashboard-calendar-panel">
+          <header class="dashboard-panel-header">
+            <div><span class="dashboard-panel-eyebrow">SCHEDULE</span><h2><i class="bi bi-calendar3"></i> Calendar & updates</h2></div>
+            <span class="dashboard-month-label" id="dashboard-month"></span>
+          </header>
+          <div class="dashboard-calendar-week" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="dashboard-calendar-days" id="dashboard-calendar-days" aria-label="Current month calendar"></div>
+          <div class="dashboard-events-title">Recent order updates</div>
+          <div class="dashboard-events" id="dashboard-events"></div>
+        </article>
+      </section>
+
+      <section class="dashboard-panel dashboard-fulfillment-panel">
+        <header class="dashboard-panel-header">
+          <div><span class="dashboard-panel-eyebrow">FULFILLMENT</span><h2><i class="bi bi-kanban"></i> Order pipeline</h2></div>
+          <a href="./orders.html" class="dashboard-panel-link">Manage orders <i class="bi bi-arrow-up-right"></i></a>
+        </header>
+        <div class="dashboard-fulfillment-scroll">
+          <table class="dashboard-fulfillment-table">
+            <thead><tr><th>Order</th><th>Placed</th><th>Items</th><th>Status</th><th>Progress</th></tr></thead>
+            <tbody id="dashboard-fulfillment-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="app-content-body legacy-dashboard-content">
+
+      <!-- ======================================================= -->
+      <!-- TOP ROW: 4 STAT KPI CARDS (Matching Screenshot exactly) -->
+      <!-- ======================================================= -->
+      <div class="row g-3 g-xl-4 mb-4" id="top-kpi-row">
+        <!-- Card 1: Trades Done -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="kpi-stat-card">
+            <div class="kpi-icon-bubble bubble-mint">
+              <i class="bi bi-arrow-repeat"></i>
+            </div>
+            <div>
+              <div class="kpi-value-text" id="stat-trades">175</div>
+              <div class="kpi-sub-text">Trades Done</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Total AUM -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="kpi-stat-card">
+            <div class="kpi-icon-bubble bubble-cyan">
+              <i class="bi bi-wallet2"></i>
+            </div>
+            <div>
+              <div class="kpi-value-text" id="stat-aum">45</div>
+              <div class="kpi-sub-text">Total AUM <i class="bi bi-arrow-right ms-1"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Total Revenue -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="kpi-stat-card">
+            <div class="kpi-icon-bubble bubble-coin">
+              <i class="bi bi-cash-stack"></i>
+            </div>
+            <div>
+              <div class="kpi-value-text" id="stat-rev">₹ 2.7L</div>
+              <div class="kpi-sub-text">Total Revenue <i class="bi bi-arrow-right ms-1"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Revenue to AUM -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="kpi-stat-card">
+            <div class="kpi-icon-bubble bubble-gold">
+              <i class="bi bi-gear-wide-connected"></i>
+            </div>
+            <div>
+              <div class="kpi-value-text" id="stat-ratio">78.92%</div>
+              <div class="kpi-sub-text">Revenue to AUM <i class="bi bi-arrow-right ms-1"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================= -->
+      <!-- MIDDLE ROW: CLIENTS DONUT & CLIENT SPREAD WORLD MAP     -->
+      <!-- ======================================================= -->
+      <div class="row g-4 mb-4">
+        <!-- Card 1: Clients breakdown with central 138 number -->
+        <div class="col-lg-5">
+          <div class="screenshot-card">
+            <div class="card-title-row">
+              <div class="card-title-text">
+                <i class="bi bi-person-badge text-warning fs-5"></i>
+                <span>Clients</span>
+              </div>
+            </div>
+
+            <div class="row align-items-center pt-2">
+              <div class="col-sm-6">
+                <div class="donut-center-container">
+                  <div id="clientsDonutChart" style="min-height: 180px;"></div>
+                  <div class="donut-center-number">138</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="d-flex flex-column gap-3 ps-sm-3">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                      <span style="display:inline-block; width:10px; height:10px; border-radius:50%; border:2.5px solid #286357;"></span>
+                      <span class="small fw-semibold text-muted">Individual</span>
+                    </div>
+                    <span class="fw-bold" style="color: #172a27; font-size: 0.95rem;">103</span>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                      <span style="display:inline-block; width:10px; height:10px; border-radius:50%; border:2.5px solid #c88f4e;"></span>
+                      <span class="small fw-semibold text-muted">NRI / Retail</span>
+                    </div>
+                    <span class="fw-bold" style="color: #172a27; font-size: 0.95rem;">35</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Client Spread with Map & Top 5 Countries -->
+        <div class="col-lg-7">
+          <div class="screenshot-card">
+            <div class="card-title-row">
+              <div class="card-title-text">
+                <i class="bi bi-globe2 text-secondary fs-5"></i>
+                <span>Client Spread</span>
+              </div>
+            </div>
+
+            <div class="row align-items-center">
+              <div class="col-sm-6 text-center">
+                <!-- SVG World Map silhouette with highlighted node matching screenshot -->
+                <svg class="world-map-svg" viewBox="0 0 500 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Generalized continent shapes matching minimal look -->
+                  <path d="M70,50 Q120,40 140,80 Q130,120 90,110 Q60,90 70,50 Z" fill="#d9e4e6"/>
+                  <path d="M120,130 Q160,140 150,200 Q130,240 110,210 Q100,160 120,130 Z" fill="#d9e4e6"/>
+                  <path d="M220,50 Q280,40 270,90 Q240,100 220,70 Z" fill="#d9e4e6"/>
+                  <path d="M230,110 Q280,120 270,190 Q240,210 220,160 Z" fill="#d9e4e6"/>
+                  <path d="M300,50 Q430,40 420,120 Q370,140 330,110 Q300,90 300,50 Z" fill="#d9e4e6"/>
+                  <path d="M380,170 Q430,180 420,230 Q370,230 380,170 Z" fill="#d9e4e6"/>
+                  <!-- Highlighted India Location Dot with green pulse -->
+                  <circle cx="340" cy="115" r="7" fill="#36a892"/>
+                  <circle cx="340" cy="115" r="14" fill="#36a892" opacity="0.3"/>
+                </svg>
+              </div>
+              <div class="col-sm-6">
+                <div class="ps-sm-3">
+                  <div class="spread-list-item">
+                    <span class="spread-rank-name">1. India</span>
+                    <span class="spread-val">20.2K</span>
+                  </div>
+                  <div class="spread-list-item">
+                    <span class="spread-rank-name">2. USA</span>
+                    <span class="spread-val">18.7K</span>
+                  </div>
+                  <div class="spread-list-item">
+                    <span class="spread-rank-name">3. China</span>
+                    <span class="spread-val">13.95K</span>
+                  </div>
+                  <div class="spread-list-item">
+                    <span class="spread-rank-name">4. Malaysia</span>
+                    <span class="spread-val">5.85K</span>
+                  </div>
+                  <div class="spread-list-item">
+                    <span class="spread-rank-name">5. South Africa</span>
+                    <span class="spread-val">2.29K</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================= -->
+      <!-- BOTTOM ROW: AUM DISTRIBUTION & CLIENT COMMITMENT        -->
+      <!-- ======================================================= -->
+      <div class="row g-4">
+        <!-- Card 1: AUM Distribution Segmented Gradient Bar -->
+        <div class="col-lg-6">
+          <div class="screenshot-card">
+            <div class="card-title-row">
+              <div class="card-title-text">
+                <i class="bi bi-wallet-fill text-warning fs-5"></i>
+                <span>AUM Distribution</span>
+              </div>
+            </div>
+
+            <div class="pill-tab-line">
+              <button class="pill-tab-item active" onclick="setAumTab(this, 'distribution')">AUM Distribution</button>
+              <button class="pill-tab-item" onclick="setAumTab(this, 'growth')">AUM Growth</button>
+            </div>
+
+            <!-- Segmented Gradient Green Bar matching screenshot -->
+            <div class="segmented-gradient-bar">
+              <div class="seg-part-1" title="ICICI 30%"></div>
+              <div class="seg-part-2" title="HDFC 25%"></div>
+              <div class="seg-part-3" title="Aditya Birla 20%"></div>
+              <div class="seg-part-4" title="Axis Bank 15%"></div>
+              <div class="seg-part-5" title="Bajaj Allianz 12%"></div>
+              <div class="seg-part-6" title="IFFCO Tokio 10%"></div>
+            </div>
+
+            <!-- Segmented legend chips matching screenshot -->
+            <div class="segmented-legend">
+              <div class="legend-chip"><span class="legend-dot" style="background:#1e4a42;"></span> ICICI</div>
+              <div class="legend-chip"><span class="legend-dot" style="background:#2a6157;"></span> HDFC</div>
+              <div class="legend-chip"><span class="legend-dot" style="background:#3c7d71;"></span> Aditya Birla</div>
+              <div class="legend-chip"><span class="legend-dot" style="background:#559c90;"></span> Axis Bank</div>
+              <div class="legend-chip"><span class="legend-dot" style="background:#7abeb2;"></span> Bajaj Allianz</div>
+              <div class="legend-chip"><span class="legend-dot" style="background:#a6dbd1;"></span> IFFCO Tokio</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Client Commitment / Inflows & Outflows -->
+        <div class="col-lg-6">
+          <div class="screenshot-card">
+            <div class="card-title-row">
+              <div class="card-title-text">
+                <i class="bi bi-handshake text-success fs-5"></i>
+                <span>Client Commitment</span>
+              </div>
+            </div>
+
+            <!-- Selectors matching screenshot -->
+            <div class="row g-2 mb-3">
+              <div class="col-7">
+                <label class="text-uppercase small text-muted" style="font-size:0.68rem; font-weight:700;">CLIENT</label>
+                <select class="form-select form-select-sm rounded-3 bg-light border-0 fw-semibold" id="client-select">
+                  <option selected>Vikas Khanna</option>
+                  <option>Rahul Sharma</option>
+                  <option>Priya Patel</option>
+                  <option>Amit Verma</option>
+                </select>
+              </div>
+              <div class="col-5">
+                <label class="text-uppercase small text-muted" style="font-size:0.68rem; font-weight:700;">YEAR</label>
+                <select class="form-select form-select-sm rounded-3 bg-light border-0 fw-semibold" id="year-select">
+                  <option selected>2026</option>
+                  <option>2025</option>
+                  <option>2024</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Dual Columns: Inflows vs Outflows -->
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="cashflow-column">
+                  <div class="cashflow-header">
+                    <span class="cashflow-label text-success">
+                      <i class="bi bi-arrow-down-left-circle-fill"></i> Inflows
+                    </span>
+                    <span class="cashflow-amount text-dark">₹12.4L <i class="bi bi-arrow-right text-muted small"></i></span>
+                  </div>
+                  <div class="cashflow-subrow">
+                    <span>Lumpsum</span>
+                    <span class="fw-bold text-dark">₹7.4L</span>
+                  </div>
+                  <div class="cashflow-subrow">
+                    <span>SIP / Periodical</span>
+                    <span class="fw-bold text-dark">₹5L</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="cashflow-column">
+                  <div class="cashflow-header">
+                    <span class="cashflow-label text-danger">
+                      <i class="bi bi-arrow-up-right-circle-fill"></i> Outflows
+                    </span>
+                    <span class="cashflow-amount text-dark">₹4.5L <i class="bi bi-arrow-right text-muted small"></i></span>
+                  </div>
+                  <div class="cashflow-subrow">
+                    <span>Lumpsum</span>
+                    <span class="fw-bold text-dark">₹3L</span>
+                  </div>
+                  <div class="cashflow-subrow">
+                    <span>SIP / Withdrawn</span>
+                    <span class="fw-bold text-dark">₹1.5L</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { initDashboardShell, formatINR } from '../scripts/dashboard-shell.js';
+  import { AuthStore, ProductStore, OrderStore, UserStore } from '../scripts/store.js';
+
+  const user = initDashboardShell({ activePage: 'dashboard', pageTitle: 'Dashboard' });
+  if (!user) throw new Error('Not authenticated');
+
+  const products = ProductStore.getAll();
+  const orders = OrderStore.getAll().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const users = UserStore.getAll();
+  const revenue = orders.reduce((sum, order) => sum + (order.status === 'cancelled' ? 0 : order.total || 0), 0);
+
+  document.getElementById('stat-trades').textContent = orders.length.toLocaleString('en-IN');
+  document.getElementById('stat-aum').textContent = products.length.toLocaleString('en-IN');
+  document.getElementById('stat-rev').textContent = formatINR(revenue);
+  document.getElementById('stat-customers').textContent = Math.max(0, users.length - 1).toLocaleString('en-IN');
+  document.getElementById('chart-order-total').textContent = orders.length.toLocaleString('en-IN');
+
+  const now = new Date();
+  const monthLabel = new Intl.DateTimeFormat('en-IN', { month: 'long', year: 'numeric' }).format(now);
+  document.getElementById('dashboard-month').textContent = monthLabel;
+  const calendar = document.getElementById('dashboard-calendar-days');
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const offset = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  calendar.innerHTML = Array.from({ length: offset + daysInMonth }, (_, index) => {
+    if (index < offset) return '<span class="calendar-day calendar-day-empty" aria-hidden="true"></span>';
+    const day = index - offset + 1;
+    const isToday = day === now.getDate();
+    return `<span class="calendar-day${isToday ? ' calendar-day-today' : ''}"${isToday ? ' aria-current="date"' : ''}>${day}</span>`;
+  }).join('');
+
+  const events = document.getElementById('dashboard-events');
+  events.innerHTML = orders.slice(0, 3).map((order, index) => {
+    const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short' }).format(new Date(order.createdAt));
+    const status = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+    return `<div class="dashboard-event"><span class="dashboard-event-bar event-tone-${index + 1}"></span><div><strong>Order ${order.id}</strong><span>${status} · ${date}</span></div></div>`;
+  }).join('') || '<p class="dashboard-empty-note">No orders yet. New orders will appear here.</p>';
+
+  const progressByStatus = { confirmed: 25, processing: 55, shipped: 80, delivered: 100, cancelled: 0 };
+  const orderRows = document.getElementById('dashboard-fulfillment-rows');
+  orderRows.innerHTML = orders.slice(0, 5).map(order => {
+    const progress = progressByStatus[order.status] ?? 0;
+    const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(order.createdAt));
+    const status = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+    return `<tr><td class="fulfillment-order-id">#${order.id}</td><td>${date}</td><td>${(order.items || []).length} items</td><td><span class="fulfillment-status status-${order.status}">${status}</span></td><td><div class="fulfillment-progress" role="progressbar" aria-label="${status}" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><span style="width:${progress}%"></span></div></td></tr>`;
+  }).join('') || '<tr><td class="dashboard-empty-note" colspan="5">No orders to track yet.</td></tr>';
+</script>
+</body>
+</html>

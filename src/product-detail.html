@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail — ShopFlow</title>
+  <meta name="description" content="View full product details from ShopFlow QR label scan.">
+  <link rel="stylesheet" href="./styles/main.scss">
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body class="product-detail-page">
+
+  <!-- Sticky Top Bar -->
+  <div class="no-print" style="position:sticky;top:0;z-index:100;background:rgba(232,237,245,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--neu-shadow-dark);padding:12px 0">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between">
+        <a href="./store.html" class="neu-btn d-inline-flex align-items-center gap-2" style="padding:8px 18px;font-size:0.85rem;text-decoration:none">
+          <i class="bi bi-arrow-left"></i> Back to Store
+        </a>
+        <a href="./landing.html" style="font-size:1.1rem;font-weight:800;color:var(--sf-primary);text-decoration:none">
+          <i class="bi bi-bag-heart-fill me-1"></i>ShopFlow
+        </a>
+        <a href="./dashboard/cart.html" class="neu-btn d-inline-flex align-items-center gap-2" style="padding:8px 18px;font-size:0.85rem;text-decoration:none">
+          <i class="bi bi-cart3"></i> <span id="cart-count-link">Cart</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Scan Banner -->
+  <div style="background:linear-gradient(135deg,var(--sf-primary),#818cf8);color:white;text-align:center;padding:10px">
+    <div class="container">
+      <span style="font-size:0.82rem;font-weight:600">
+        <i class="bi bi-qr-code-scan me-2"></i>You scanned a ShopFlow QR label — 
+        <span id="scan-time"></span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container" style="padding:40px 12px;max-width:900px">
+
+    <!-- Product not found state -->
+    <div id="not-found" style="display:none;text-align:center;padding:80px 0">
+      <div style="width:80px;height:80px;border-radius:24px;background:var(--neu-bg);box-shadow:8px 8px 20px var(--neu-shadow-dark),-8px -8px 20px var(--neu-shadow-light);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2rem;color:var(--sf-primary)">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <h2 style="font-weight:800;color:var(--neu-text)">Product Not Found</h2>
+      <p style="color:var(--neu-text-light)">This QR code may be expired or the product has been removed.</p>
+      <a href="./store.html" class="neu-btn neu-btn-primary" style="display:inline-block;margin-top:16px">
+        <i class="bi bi-shop me-2"></i>Browse All Products
+      </a>
+    </div>
+
+    <!-- Product Detail Card -->
+    <div id="product-detail" style="display:none">
+      <div class="product-detail-card">
+        <div class="row g-0">
+          <!-- Product Image -->
+          <div class="col-md-5">
+            <div style="position:relative;height:100%;min-height:340px">
+              <img id="product-image" src="" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:24px 0 0 24px">
+              <div id="discount-badge" style="display:none;position:absolute;top:16px;left:16px;background:var(--sf-primary);color:white;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px"></div>
+              <div id="stock-badge" style="position:absolute;top:16px;right:16px;border-radius:8px;padding:4px 10px;font-size:0.72rem;font-weight:700;background:rgba(255,255,255,0.92)"></div>
+            </div>
+          </div>
+          <!-- Product Info -->
+          <div class="col-md-7" style="padding:36px">
+            <div id="product-category" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--sf-primary);font-weight:700;margin-bottom:8px"></div>
+            <h1 id="product-name" style="font-size:1.7rem;font-weight:800;color:var(--neu-text);margin-bottom:8px;line-height:1.25"></h1>
+            <div id="product-brand" style="font-size:0.88rem;color:var(--neu-text-light);margin-bottom:12px"></div>
+            <div id="product-rating" style="font-size:0.9rem;color:#f59e0b;margin-bottom:16px"></div>
+            <div class="d-flex align-items-baseline gap-2 mb-4">
+              <span id="product-price" style="font-size:2rem;font-weight:900;color:var(--sf-primary)"></span>
+              <span id="product-original" style="font-size:1rem;text-decoration:line-through;color:var(--neu-text-light)"></span>
+              <span id="product-discount-pct" style="background:rgba(34,197,94,0.15);color:#16a34a;font-size:0.78rem;font-weight:700;padding:3px 10px;border-radius:50px"></span>
+            </div>
+            <p id="product-description" style="font-size:0.9rem;color:var(--neu-text-light);line-height:1.7;margin-bottom:24px"></p>
+
+            <!-- Specs Grid -->
+            <div class="row g-2 mb-24" style="margin-bottom:24px">
+              <div class="col-6">
+                <div style="padding:12px;border-radius:12px;background:var(--neu-bg);box-shadow:inset 3px 3px 8px var(--neu-shadow-dark),inset -3px -3px 8px var(--neu-shadow-light)">
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--neu-text-light);font-weight:700">SKU</div>
+                  <div id="spec-sku" style="font-size:0.88rem;font-weight:700;color:var(--neu-text);margin-top:2px"></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div style="padding:12px;border-radius:12px;background:var(--neu-bg);box-shadow:inset 3px 3px 8px var(--neu-shadow-dark),inset -3px -3px 8px var(--neu-shadow-light)">
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--neu-text-light);font-weight:700">Weight</div>
+                  <div id="spec-weight" style="font-size:0.88rem;font-weight:700;color:var(--neu-text);margin-top:2px"></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div style="padding:12px;border-radius:12px;background:var(--neu-bg);box-shadow:inset 3px 3px 8px var(--neu-shadow-dark),inset -3px -3px 8px var(--neu-shadow-light)">
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--neu-text-light);font-weight:700">Dimensions</div>
+                  <div id="spec-dims" style="font-size:0.88rem;font-weight:700;color:var(--neu-text);margin-top:2px"></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div style="padding:12px;border-radius:12px;background:var(--neu-bg);box-shadow:inset 3px 3px 8px var(--neu-shadow-dark),inset -3px -3px 8px var(--neu-shadow-light)">
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--neu-text-light);font-weight:700">Stock</div>
+                  <div id="spec-stock" style="font-size:0.88rem;font-weight:700;margin-top:2px"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div id="product-tags" style="margin-bottom:24px"></div>
+
+            <!-- CTA Buttons -->
+            <div class="d-flex gap-3 flex-wrap">
+              <button id="add-to-cart-btn" onclick="addToCart()" class="neu-btn neu-btn-primary d-flex align-items-center gap-2" style="font-size:0.95rem;padding:12px 28px">
+                <i class="bi bi-cart-plus"></i> Add to Cart
+              </button>
+              <a href="./store.html" class="neu-btn d-flex align-items-center gap-2" style="font-size:0.95rem;padding:12px 28px;text-decoration:none">
+                <i class="bi bi-shop"></i> View All Products
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Scan Info -->
+      <div class="neu-card mt-4 p-4">
+        <div class="row align-items-center g-3">
+          <div class="col-auto">
+            <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--sf-primary),#818cf8);display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem">
+              <i class="bi bi-qr-code-scan"></i>
+            </div>
+          </div>
+          <div class="col">
+            <div style="font-weight:700;color:var(--neu-text);margin-bottom:4px">QR Label Information</div>
+            <div style="font-size:0.82rem;color:var(--neu-text-light)">
+              Product ID: <span id="info-pid" style="font-family:monospace;color:var(--sf-primary);font-weight:600"></span> &nbsp;|&nbsp;
+              Scanned: <span id="info-time" style="color:var(--neu-text)"></span> &nbsp;|&nbsp;
+              Platform: <strong style="color:var(--neu-text)">ShopFlow Retail</strong>
+            </div>
+          </div>
+          <div class="col-auto no-print">
+            <button onclick="window.print()" class="neu-btn d-flex align-items-center gap-2" style="padding:8px 16px;font-size:0.82rem">
+              <i class="bi bi-printer"></i> Print Info
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cart Toast -->
+  <div id="cart-toast" class="no-print" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:white;border-radius:14px;padding:14px 24px;box-shadow:0 8px 32px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;z-index:999;transition:transform 0.3s ease;min-width:300px">
+    <div style="width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;color:#22c55e"><i class="bi bi-cart-check"></i></div>
+    <div>
+      <div style="font-weight:700;font-size:0.9rem;color:#1e293b">Added to Cart!</div>
+      <div style="font-size:0.78rem;color:#64748b">Item added successfully</div>
+    </div>
+    <a href="./dashboard/cart.html" style="margin-left:auto;background:var(--sf-primary);color:white;text-decoration:none;font-size:0.78rem;font-weight:600;padding:6px 12px;border-radius:8px">View Cart</a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="landing-footer no-print">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <a href="./landing.html" style="font-size:1.1rem;font-weight:800;color:var(--sf-primary);text-decoration:none">
+          <i class="bi bi-bag-heart-fill me-1"></i>ShopFlow
+        </a>
+        <p style="color:var(--neu-text-light);font-size:0.82rem;margin:0">Professional Retail Management Platform</p>
+        <div class="d-flex gap-3">
+          <a href="./store.html" style="color:var(--neu-text-light);text-decoration:none;font-size:0.82rem">Store</a>
+          <a href="./login.html" style="color:var(--neu-text-light);text-decoration:none;font-size:0.82rem">Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<script type="module">
+  import { ProductStore, CartStore, AuthStore } from './scripts/store.js';
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+  const user = AuthStore.currentUser();
+
+  // Set scan time
+  const now = new Date();
+  const timeStr = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  document.getElementById('scan-time').textContent = timeStr;
+  document.getElementById('info-time').textContent = timeStr;
+
+  // Cart count
+  if (user) {
+    const count = CartStore.getItemCount(user.id);
+    if (count > 0) document.getElementById('cart-count-link').textContent = 'Cart (' + count + ')';
+  }
+
+  // Load product
+  if (!productId) {
+    document.getElementById('not-found').style.display = 'block';
+  } else {
+    const product = ProductStore.findById(productId);
+    if (!product || !product.active) {
+      document.getElementById('not-found').style.display = 'block';
+    } else {
+      document.getElementById('product-detail').style.display = 'block';
+      document.title = product.name + ' — ShopFlow';
+      document.getElementById('info-pid').textContent = product.id;
+
+      // Image
+      const img = document.getElementById('product-image');
+      img.src = product.image || 'https://via.placeholder.com/400x340?text=No+Image';
+      img.alt = product.name;
+
+      // Discount
+      if (product.originalPrice && product.originalPrice > product.price) {
+        const pct = Math.round((1 - product.price / product.originalPrice) * 100);
+        const badge = document.getElementById('discount-badge');
+        badge.textContent = '-' + pct + '% OFF';
+        badge.style.display = 'block';
+        document.getElementById('product-original').textContent = '₹' + product.originalPrice.toLocaleString('en-IN');
+        document.getElementById('product-discount-pct').textContent = pct + '% off';
+      }
+
+      // Stock badge
+      const sb = document.getElementById('stock-badge');
+      if (product.stock === 0) {
+        sb.textContent = '✗ Out of Stock'; sb.style.color = '#ef4444';
+      } else if (product.stock < 10) {
+        sb.textContent = '⚠ Only ' + product.stock + ' left'; sb.style.color = '#d97706';
+      } else {
+        sb.textContent = '✓ In Stock'; sb.style.color = '#16a34a';
+      }
+
+      // Details
+      document.getElementById('product-category').textContent = product.category;
+      document.getElementById('product-name').textContent = product.name;
+      document.getElementById('product-brand').innerHTML = '<i class="bi bi-building me-1"></i>' + (product.brand || 'ShopFlow');
+      document.getElementById('product-price').textContent = '₹' + product.price.toLocaleString('en-IN');
+      document.getElementById('product-description').textContent = product.description;
+
+      // Rating
+      const stars = '★'.repeat(Math.round(product.rating || 0)) + '☆'.repeat(5 - Math.round(product.rating || 0));
+      document.getElementById('product-rating').innerHTML = `${stars} <span style="color:var(--neu-text-light)">${product.rating || 0}/5 (${product.reviews || 0} reviews)</span>`;
+
+      // Specs
+      document.getElementById('spec-sku').textContent = product.sku || '—';
+      document.getElementById('spec-weight').textContent = product.weight || '—';
+      document.getElementById('spec-dims').textContent = product.dimensions || '—';
+      const stockEl = document.getElementById('spec-stock');
+      stockEl.textContent = product.stock + ' units';
+      stockEl.style.color = product.stock === 0 ? '#ef4444' : product.stock < 10 ? '#d97706' : '#16a34a';
+
+      // Tags
+      if (product.tags && product.tags.length) {
+        document.getElementById('product-tags').innerHTML = product.tags.map(t => 
+          `<span style="display:inline-block;background:var(--sf-primary-light);color:var(--sf-primary);font-size:0.75rem;font-weight:600;padding:4px 12px;border-radius:50px;margin:0 4px 4px 0">#${t}</span>`
+        ).join('');
+      }
+
+      // Add to cart button
+      if (product.stock === 0) {
+        const btn = document.getElementById('add-to-cart-btn');
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.cursor = 'not-allowed';
+        btn.innerHTML = '<i class="bi bi-x-circle"></i> Out of Stock';
+      }
+    }
+  }
+
+  window.addToCart = function() {
+    if (!user) {
+      window.location.href = './login.html?return=' + encodeURIComponent(window.location.href);
+      return;
+    }
+    const product = ProductStore.findById(productId);
+    if (!product) return;
+    CartStore.addItem(user.id, productId);
+    const toast = document.getElementById('cart-toast');
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => toast.style.transform = 'translateX(-50%) translateY(120px)', 3000);
+    const count = CartStore.getItemCount(user.id);
+    document.getElementById('cart-count-link').textContent = 'Cart (' + count + ')';
+  };
+</script>
+</body>
+</html>

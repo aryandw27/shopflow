@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index,follow">
+  <title>ShopFlow</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles/main.scss">
+</head>
+<body class="custom-page">
+  <header class="custom-page-header">
+    <a href="./landing.html" class="custom-page-brand"><span class="custom-page-brand-mark"><i class="bi bi-bag-heart-fill"></i></span><span id="custom-page-brand">ShopFlow</span></a>
+    <a href="./store.html" class="custom-page-back"><i class="bi bi-shop me-1"></i>Browse store</a>
+  </header>
+  <main id="custom-page-content" class="custom-page-content" aria-live="polite"></main>
+  <footer class="custom-page-footer"><span id="custom-page-copyright"></span></footer>
+  <script type="module">
+    import { CmsStore } from './scripts/store.js';
+
+    const cms = CmsStore.get();
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[char]);
+    const safeHref = (value, fallback = './landing.html') => {
+      const href = String(value || '').trim();
+      if (!href || /^(javascript|data|vbscript):/i.test(href)) return fallback;
+      try {
+        const url = new URL(href, window.location.href);
+        return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol) ? href : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+    const safeImageUrl = value => {
+      const href = safeHref(value, '');
+      return href && /^(https?:|\.{1,2}\/|\/)/i.test(href) ? href : '';
+    };
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    const page = cms.pages.find(item => item.slug === slug && item.published !== false);
+    const content = document.getElementById('custom-page-content');
+
+    document.getElementById('custom-page-brand').textContent = cms.branding.storeName || 'ShopFlow';
+    document.getElementById('custom-page-copyright').textContent = cms.footer.copyright || '';
+
+    if (!page) {
+      document.title = `Page not found — ${cms.branding.storeName || 'ShopFlow'}`;
+      content.innerHTML = '<section class="custom-page-empty"><span class="custom-page-empty-icon"><i class="bi bi-file-earmark-x"></i></span><h1>Page not found</h1><p>This page is unavailable or has not been published.</p><a class="custom-page-primary-button" href="./landing.html">Return home</a></section>';
+    } else {
+      document.title = `${page.title} — ${cms.branding.storeName || 'ShopFlow'}`;
+      const sections = Array.isArray(page.sections) ? page.sections : [];
+      content.innerHTML = sections.map(section => {
+        const title = escapeHtml(section.title);
+        const body = escapeHtml(section.body).replace(/\n/g, '<br>');
+        const button = section.buttonText
+          ? `<a class="custom-page-primary-button" href="${escapeHtml(safeHref(section.buttonHref, './store.html'))}">${escapeHtml(section.buttonText)}</a>`
+          : '';
+        if (section.type === 'spacer') return '<div class="custom-page-spacer" aria-hidden="true"></div>';
+        if (section.type === 'image') {
+          const imageUrl = safeImageUrl(section.imageUrl);
+          return `<section class="custom-page-section custom-page-image-section">${title ? `<h2>${title}</h2>` : ''}${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${title || escapeHtml(page.title)}" loading="lazy">` : '<p class="custom-page-image-placeholder">Add a valid image URL in the page builder.</p>'}${body ? `<p>${body}</p>` : ''}</section>`;
+        }
+        if (section.type === 'button') {
+          return `<section class="custom-page-section custom-page-button-section">${title ? `<h2>${title}</h2>` : ''}${body ? `<p>${body}</p>` : ''}${button}</section>`;
+        }
+        if (section.type === 'callout') {
+          return `<section class="custom-page-section custom-page-callout">${title ? `<h2>${title}</h2>` : ''}${body ? `<p>${body}</p>` : ''}${button}</section>`;
+        }
+        if (section.type === 'hero') {
+          return `<section class="custom-page-section custom-page-hero"><span class="custom-page-eyebrow">${escapeHtml(cms.branding.storeName)}</span><h1>${title || escapeHtml(page.title)}</h1>${body ? `<p>${body}</p>` : ''}${button}</section>`;
+        }
+        if (section.type === 'heading') {
+          return `<section class="custom-page-section custom-page-heading">${title ? `<h2>${title}</h2>` : ''}${body ? `<p>${body}</p>` : ''}</section>`;
+        }
+        return `<section class="custom-page-section custom-page-text">${title ? `<h2>${title}</h2>` : ''}${body ? `<p>${body}</p>` : ''}${button}</section>`;
+      }).join('') || '<section class="custom-page-empty"><h1></h1><p>This page is ready for content. Add sections in the page builder.</p></section>';
+      if (!sections.length) content.querySelector('.custom-page-empty h1').textContent = page.title;
+    }
+  </script>
+</body>
+</html>

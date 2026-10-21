@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Create Account — ShopFlow</title>
+  <link rel="stylesheet" href="./styles/main.scss">
+</head>
+<body class="auth-page">
+
+  <div class="auth-card neu-card" style="max-width:480px">
+    <div class="auth-logo">
+      <div class="logo-icon"><i class="bi bi-bag-heart-fill"></i></div>
+      <h1>Join ShopFlow</h1>
+      <p>Create your account and start shopping today.</p>
+    </div>
+
+    <div class="auth-error" id="auth-error"></div>
+
+    <form id="register-form" novalidate>
+      <div class="auth-form-group">
+        <label class="auth-label" for="name">Full Name</label>
+        <input type="text" id="name" class="neu-input" placeholder="Rahul Sharma" autocomplete="name" required>
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-label" for="email">Email Address</label>
+        <input type="email" id="email" class="neu-input" placeholder="rahul@example.com" autocomplete="email" required>
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-label" for="password">Password</label>
+        <div style="position:relative">
+          <input type="password" id="password" class="neu-input" placeholder="Min. 6 characters" required style="padding-right:48px" oninput="checkStrength(this.value)">
+          <button type="button" onclick="togglePw('password','icon1')" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--neu-text-light);cursor:pointer">
+            <i class="bi bi-eye" id="icon1"></i>
+          </button>
+        </div>
+        <div id="strength-bar" style="height:4px;border-radius:4px;margin-top:8px;background:#e2e8f0;overflow:hidden">
+          <div id="strength-fill" style="height:100%;width:0;border-radius:4px;transition:all 0.3s"></div>
+        </div>
+        <div id="strength-text" style="font-size:0.75rem;margin-top:4px;color:var(--neu-text-light)"></div>
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-label" for="confirm-password">Confirm Password</label>
+        <div style="position:relative">
+          <input type="password" id="confirm-password" class="neu-input" placeholder="Repeat password" required style="padding-right:48px">
+          <button type="button" onclick="togglePw('confirm-password','icon2')" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--neu-text-light);cursor:pointer">
+            <i class="bi bi-eye" id="icon2"></i>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:24px">
+        <input type="checkbox" id="terms" required style="width:16px;height:16px;accent-color:var(--sf-primary);margin-top:2px;flex-shrink:0">
+        <label for="terms" style="font-size:0.82rem;color:var(--neu-text-light);cursor:pointer">
+          I agree to the <a href="#" style="color:var(--sf-primary);font-weight:600">Terms of Service</a> and <a href="#" style="color:var(--sf-primary);font-weight:600">Privacy Policy</a>
+        </label>
+      </div>
+      <button type="submit" id="submit-btn" class="neu-btn neu-btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="font-size:0.95rem">
+        <i class="bi bi-person-plus-fill"></i>
+        <span>Create Account</span>
+      </button>
+    </form>
+
+    <!-- Account type note -->
+    <div style="margin-top:16px;background:rgba(34,197,94,0.07);border-radius:12px;padding:12px 16px;border:1px solid rgba(34,197,94,0.2)">
+      <div style="font-size:0.78rem;color:#16a34a;font-weight:600">
+        <i class="bi bi-shield-check me-1"></i> You'll be registered as a <strong>Customer</strong>
+      </div>
+      <div style="font-size:0.75rem;color:var(--neu-text-light);margin-top:3px">For admin access, use: admin@shopflow.com / admin123</div>
+    </div>
+
+    <div class="auth-divider" style="margin:20px 0">or</div>
+    <p style="text-align:center;font-size:0.88rem;color:var(--neu-text-light);margin:0">
+      Already have an account?
+      <a href="./login.html" style="color:var(--sf-primary);font-weight:700;text-decoration:none">Sign In</a>
+    </p>
+    <p style="text-align:center;margin-top:12px">
+      <a href="./landing.html" style="font-size:0.82rem;color:var(--neu-text-light);text-decoration:none">
+        <i class="bi bi-arrow-left me-1"></i>Back to Home
+      </a>
+    </p>
+  </div>
+
+<script type="module">
+  import { UserStore, AuthStore } from './scripts/store.js';
+
+  if (AuthStore.currentUser()) {
+    window.location.href = './dashboard/index.html';
+  }
+
+  window.togglePw = function(id, iconId) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById(iconId);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    icon.className = el.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+  };
+
+  window.checkStrength = function(val) {
+    const fill = document.getElementById('strength-fill');
+    const text = document.getElementById('strength-text');
+    if (!val) { fill.style.width = '0'; text.textContent = ''; return; }
+
+    let strength = 0;
+    let label = '', color = '';
+    if (val.length >= 6) strength++;
+    if (val.length >= 10) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+    if (strength <= 1) { label = 'Weak'; color = '#ef4444'; }
+    else if (strength <= 3) { label = 'Medium'; color = '#f59e0b'; }
+    else { label = 'Strong'; color = '#22c55e'; }
+
+    fill.style.width = (strength / 5 * 100) + '%';
+    fill.style.background = color;
+    text.textContent = 'Password strength: ' + label;
+    text.style.color = color;
+  };
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    const terms = document.getElementById('terms').checked;
+    const btn = document.getElementById('submit-btn');
+    const errDiv = document.getElementById('auth-error');
+
+    errDiv.classList.remove('show');
+
+    if (!name || !email || !password) {
+      errDiv.textContent = 'Please fill in all fields.';
+      errDiv.classList.add('show');
+      return;
+    }
+    if (password.length < 6) {
+      errDiv.textContent = 'Password must be at least 6 characters.';
+      errDiv.classList.add('show');
+      return;
+    }
+    if (password !== confirm) {
+      errDiv.textContent = 'Passwords do not match.';
+      errDiv.classList.add('show');
+      return;
+    }
+    if (!terms) {
+      errDiv.textContent = 'Please accept the Terms of Service.';
+      errDiv.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner-border spinner-border-sm me-2" role="status"></div> Creating account…';
+
+    await new Promise(r => setTimeout(r, 700));
+
+    const result = UserStore.register(name, email, password);
+    if (result.error) {
+      errDiv.textContent = result.error;
+      errDiv.classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-plus-fill"></i><span>Create Account</span>';
+    } else {
+      // Auto-login
+      AuthStore.login(email, password);
+      btn.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Account Created! Redirecting…</span>';
+      setTimeout(() => window.location.href = './dashboard/index.html', 700);
+    }
+  });
+</script>
+</body>
+</html>

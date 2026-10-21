@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Website CMS Content Manager – ShopFlow</title>
+  <link rel="stylesheet" href="../styles/main.scss" />
+  <style>
+    .cms-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .cms-nav-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #eef2f4;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .cms-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #7e8e99;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .cms-tab-btn:hover {
+      background: #eef5f3;
+      color: #1e4a42;
+    }
+    .cms-tab-btn.active {
+      background: #dff1ee;
+      color: #1e4a42;
+      border-color: rgba(30, 74, 66, 0.2);
+    }
+    .cms-panel {
+      display: none;
+    }
+    .cms-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .cms-card {
+      background: #ffffff;
+      border: 1px solid #edf1f3;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(22, 45, 38, 0.03);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .cms-card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #172a27;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cms-card-subtitle {
+      font-size: 0.82rem;
+      color: #7e8e99;
+      margin-bottom: 20px;
+    }
+    .cms-form-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1e332f;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .cms-input, .cms-textarea, .cms-select {
+      width: 100%;
+      background: #fbfcfd;
+      border: 1px solid #dce4e6;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      color: #172a27;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .cms-input:focus, .cms-textarea:focus, .cms-select:focus {
+      background: #ffffff;
+      border-color: #1e4a42;
+      box-shadow: 0 0 0 3px rgba(30, 74, 66, 0.1);
+    }
+    .cms-item-card {
+      background: #f8fafb;
+      border: 1px solid #eef2f4;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .cms-badge-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #dff1ee;
+      color: #1e4a42;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-app">
+  <div class="admin-header" id="admin-header-placeholder"></div>
+  <main class="admin-main">
+    <div class="app-content-body">
+      <div class="cms-container">
+        <!-- Top Title Bar -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="h3 fw-bold mb-1" style="color: #172a27;">
+              <i class="bi bi-sliders2 text-success me-2"></i>Website Content Management System (CMS)
+            </h1>
+            <p class="text-muted small mb-0">
+              Edit all texts, marketing banners, titles, testimonials, and contact details across the public website in real time.
+            </p>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button onclick="previewLanding()" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+              <i class="bi bi-eye me-1"></i> View Live Landing Page
+            </button>
+            <button onclick="resetDefaults()" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset to Default
+            </button>
+            <button onclick="saveAllCms()" class="btn btn-success btn-sm rounded-pill px-4 fw-bold">
+              <i class="bi bi-check2-circle me-1"></i> Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Navigation Tabs -->
+        <div class="cms-nav-tabs">
+          <button class="cms-tab-btn active" onclick="switchTab('branding')">
+            <i class="bi bi-palette"></i> Branding & General
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('navigation')">
+            <i class="bi bi-list"></i> Navigation & Visibility
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('announcement')">
+            <i class="bi bi-megaphone"></i> Banner Bar
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('hero')">
+            <i class="bi bi-stars"></i> Hero Section
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('features')">
+            <i class="bi bi-grid"></i> Features & Cards
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('testimonials')">
+            <i class="bi bi-chat-quote"></i> Testimonials
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('cta')">
+            <i class="bi bi-cursor"></i> Call to Action
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('footer')">
+            <i class="bi bi-layout-text-window"></i> Footer & Contact
+          </button>
+          <button class="cms-tab-btn" onclick="switchTab('pages')">
+            <i class="bi bi-file-earmark-plus"></i> Page Builder
+          </button>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 1: BRANDING & GENERAL -->
+        <!-- ======================================================= -->
+        <div class="cms-panel active" id="tab-branding">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-shop text-primary"></i>Store Identity & Global Settings</div>
+            <div class="cms-card-subtitle">Configure your store's branding name, tagline, and customer support channels.</div>
+            
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="cms-form-label">Store / Company Name</label>
+                <input type="text" id="storeName" class="cms-input" placeholder="ShopFlow">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Store Tagline / Slogan</label>
+                <input type="text" id="tagLine" class="cms-input" placeholder="Smart Retail Platform for Shop Owners">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Support Email Address</label>
+                <input type="email" id="supportEmail" class="cms-input" placeholder="support@shopflow.com">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Support Phone Number</label>
+                <input type="text" id="supportPhone" class="cms-input" placeholder="+91 98765 43210">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Default Currency Symbol</label>
+                <input type="text" id="currency" class="cms-input" placeholder="₹">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Brand Color Accent (Hex)</label>
+                <div class="d-flex gap-2">
+                  <input type="color" id="themeColorPicker" class="form-control form-control-color" style="width: 50px; height: 42px; border-radius: 10px;" onchange="document.getElementById('themeColor').value = this.value">
+                  <input type="text" id="themeColor" class="cms-input" placeholder="#1e4a42">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cms-panel" id="tab-navigation">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-list text-primary"></i>Public navigation</div>
+            <div class="cms-card-subtitle">Edit, reorder, show, or remove the public website navigation buttons. Links may point to existing site pages or published custom pages.</div>
+            <div id="navigationListContainer"></div>
+            <button type="button" onclick="addNavigationItem()" class="btn btn-primary btn-sm rounded-pill px-3">
+              <i class="bi bi-plus-lg me-1"></i>Add navigation button
+            </button>
+          </div>
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-eye text-primary"></i>Landing page sections</div>
+            <div class="cms-card-subtitle">Choose which main sections are visible on the public landing page.</div>
+            <div class="cms-visibility-grid">
+              <label><input type="checkbox" id="visibilityAnnouncement"> Announcement banner</label>
+              <label><input type="checkbox" id="visibilityHero"> Hero section</label>
+              <label><input type="checkbox" id="visibilityFeatures"> Feature cards</label>
+              <label><input type="checkbox" id="visibilityCatalog"> Product catalog</label>
+              <label><input type="checkbox" id="visibilityTestimonials"> Testimonials</label>
+              <label><input type="checkbox" id="visibilityCta"> Call to action</label>
+              <label><input type="checkbox" id="visibilityFooter"> Footer</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 2: ANNOUNCEMENT BAR -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-announcement">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-megaphone text-warning"></i>Top Announcement Banner</div>
+            <div class="cms-card-subtitle">Display a global alert or promotion bar at the top of the landing page.</div>
+
+            <div class="form-check form-switch mb-4">
+              <input class="form-check-input" type="checkbox" id="announcementActive" style="width: 44px; height: 22px;">
+              <label class="form-check-label fw-bold ms-2" for="announcementActive">Enable Top Announcement Bar</label>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="cms-form-label">Badge Label</label>
+                <input type="text" id="announcementBadge" class="cms-input" placeholder="NEW">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Banner Message Text</label>
+                <input type="text" id="announcementText" class="cms-input" placeholder="Special Offer: Free QR Label Setup...">
+              </div>
+              <div class="col-md-3">
+                <label class="cms-form-label">Target Link URL</label>
+                <input type="text" id="announcementLink" class="cms-input" placeholder="./store.html">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 3: HERO SECTION -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-hero">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-stars text-primary"></i>Main Hero Billboard</div>
+            <div class="cms-card-subtitle">Customize the primary headlines, description, and action buttons shown on first impression.</div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="cms-form-label">Hero Pill Badge</label>
+                <input type="text" id="heroBadge" class="cms-input" placeholder="Trusted by 2,400+ Retailers">
+              </div>
+              <div class="col-md-4">
+                <label class="cms-form-label">Headline Line 1</label>
+                <input type="text" id="titleLine1" class="cms-input" placeholder="The Smarter Way to">
+              </div>
+              <div class="col-md-4">
+                <label class="cms-form-label">Highlighted Text (Gradient)</label>
+                <input type="text" id="highlight" class="cms-input" placeholder="Run Your Retail">
+              </div>
+              <div class="col-md-4">
+                <label class="cms-form-label">Headline Line 2</label>
+                <input type="text" id="titleLine2" class="cms-input" placeholder="Business">
+              </div>
+              <div class="col-12">
+                <label class="cms-form-label">Sub-Headline Paragraph</label>
+                <textarea id="heroSubtitle" class="cms-textarea" rows="3"></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Primary Button Label</label>
+                <input type="text" id="ctaPrimaryText" class="cms-input" placeholder="Start Free Today">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Primary Button Link</label>
+                <input type="text" id="ctaPrimaryLink" class="cms-input" placeholder="./register.html">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Secondary Button Label</label>
+                <input type="text" id="ctaSecondaryText" class="cms-input" placeholder="Explore Store">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Secondary Button Link</label>
+                <input type="text" id="ctaSecondaryLink" class="cms-input" placeholder="./store.html">
+              </div>
+            </div>
+
+            <div class="border-top my-4 pt-3">
+              <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart-line me-2"></i>Hero Trust Statistics (4 Counters)</h6>
+              <div class="row g-3">
+                <div class="col-sm-6 col-md-3">
+                  <label class="cms-form-label">Stat 1 Value</label>
+                  <input type="text" id="stat1Num" class="cms-input" placeholder="2.4K+">
+                  <label class="cms-form-label mt-2">Stat 1 Label</label>
+                  <input type="text" id="stat1Label" class="cms-input" placeholder="Shop Owners">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <label class="cms-form-label">Stat 2 Value</label>
+                  <input type="text" id="stat2Num" class="cms-input" placeholder="₹48Cr+">
+                  <label class="cms-form-label mt-2">Stat 2 Label</label>
+                  <input type="text" id="stat2Label" class="cms-input" placeholder="Sales Tracked">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <label class="cms-form-label">Stat 3 Value</label>
+                  <input type="text" id="stat3Num" class="cms-input" placeholder="99.9%">
+                  <label class="cms-form-label mt-2">Stat 3 Label</label>
+                  <input type="text" id="stat3Label" class="cms-input" placeholder="Uptime">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <label class="cms-form-label">Stat 4 Value</label>
+                  <input type="text" id="stat4Num" class="cms-input" placeholder="4.9★">
+                  <label class="cms-form-label mt-2">Stat 4 Label</label>
+                  <input type="text" id="stat4Label" class="cms-input" placeholder="Rating">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 4: FEATURES -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-features">
+          <div class="cms-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <div class="cms-card-title"><i class="bi bi-grid text-primary"></i>Core Retailer Features</div>
+                <div class="cms-card-subtitle mb-0">Control the cards that explain ShopFlow's capabilities to customers.</div>
+              </div>
+              <button onclick="addFeatureCard()" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-plus-lg me-1"></i> Add Feature Card
+              </button>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="cms-form-label">Section Badge</label>
+                <input type="text" id="featuresBadge" class="cms-input" placeholder="Features">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Section Title</label>
+                <input type="text" id="featuresTitle" class="cms-input" placeholder="Everything a Modern Retailer Needs">
+              </div>
+              <div class="col-12">
+                <label class="cms-form-label">Section Subtitle</label>
+                <input type="text" id="featuresSubtitle" class="cms-input">
+              </div>
+            </div>
+
+            <!-- Dynamic Feature Cards -->
+            <div id="featuresListContainer"></div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 5: TESTIMONIALS -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-testimonials">
+          <div class="cms-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <div class="cms-card-title"><i class="bi bi-chat-quote text-warning"></i>Customer Reviews & Testimonials</div>
+                <div class="cms-card-subtitle mb-0">Showcase authentic experiences from real shop owners across the country.</div>
+              </div>
+              <button onclick="addTestimonial()" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-plus-lg me-1"></i> Add Review
+              </button>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="cms-form-label">Section Badge</label>
+                <input type="text" id="testBadge" class="cms-input" placeholder="Testimonials">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Section Title</label>
+                <input type="text" id="testTitle" class="cms-input" placeholder="What Retailers Say">
+              </div>
+            </div>
+
+            <div id="testimonialsListContainer"></div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 6: CTA BANNER -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-cta">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-cursor text-info"></i>Bottom Call To Action</div>
+            <div class="cms-card-subtitle">Encourage visiting shop owners to register before leaving the website.</div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="cms-form-label">CTA Badge</label>
+                <input type="text" id="ctaBadge" class="cms-input">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Headline Title</label>
+                <input type="text" id="ctaTitle" class="cms-input">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Sub-Headline Text</label>
+                <input type="text" id="ctaSubtitle" class="cms-input">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Primary Button Text</label>
+                <input type="text" id="ctaBtnPrimaryText" class="cms-input">
+                <label class="cms-form-label mt-2">Primary Button Link</label>
+                <input type="text" id="ctaBtnPrimaryLink" class="cms-input" placeholder="./register.html">
+              </div>
+              <div class="col-md-6">
+                <label class="cms-form-label">Secondary Button Text</label>
+                <input type="text" id="ctaBtnSecondaryText" class="cms-input">
+                <label class="cms-form-label mt-2">Secondary Button Link</label>
+                <input type="text" id="ctaBtnSecondaryLink" class="cms-input" placeholder="./store.html">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 7: FOOTER -->
+        <!-- ======================================================= -->
+        <div class="cms-panel" id="tab-footer">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-layout-text-window text-secondary"></i>Footer Content & Legal</div>
+            <div class="cms-card-subtitle">Edit the summary paragraph and copyright notice shown at the bottom of all public pages.</div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="cms-form-label">About Company Paragraph</label>
+                <textarea id="footerAbout" class="cms-textarea" rows="3"></textarea>
+              </div>
+              <div class="col-12">
+                <label class="cms-form-label">Copyright Notice Line</label>
+                <input type="text" id="footerCopyright" class="cms-input">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cms-panel" id="tab-pages">
+          <div class="cms-card">
+            <div class="cms-card-title"><i class="bi bi-file-earmark-plus text-primary"></i>Create a custom page</div>
+            <div class="cms-card-subtitle">Build flexible pages from safe, reusable sections. Pages are saved in this browser and can be published as standalone links.</div>
+            <div class="row g-3 align-items-end">
+              <div class="col-md-5">
+                <label class="cms-form-label" for="newPageTitle">Page title</label>
+                <input type="text" id="newPageTitle" class="cms-input" placeholder="About our store" maxlength="80">
+              </div>
+              <div class="col-md-5">
+                <label class="cms-form-label" for="newPageSlug">Page address</label>
+                <div class="input-group">
+                  <span class="input-group-text">?slug=</span>
+                  <input type="text" id="newPageSlug" class="cms-input" placeholder="about-our-store" maxlength="50" pattern="[a-z0-9]+(?:-[a-z0-9]+)*">
+                </div>
+              </div>
+              <div class="col-md-2 d-grid">
+                <button type="button" onclick="createCmsPage()" class="btn btn-primary rounded-3"><i class="bi bi-plus-lg me-1"></i>Create</button>
+              </div>
+            </div>
+          </div>
+          <div class="cms-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+              <div>
+                <div class="cms-card-title"><i class="bi bi-layout-text-window-reverse text-primary"></i>Pages and sections</div>
+                <div class="cms-card-subtitle mb-0">Edit page details, add/reorder sections, and publish or remove pages.</div>
+              </div>
+              <button type="button" onclick="saveAllCms()" class="btn btn-primary btn-sm rounded-pill px-4"><i class="bi bi-save me-1"></i>Save pages</button>
+            </div>
+            <div id="pagesListContainer"></div>
+          </div>
+        </div>
+
+        <!-- Floating save action footer -->
+        <div class="d-flex justify-content-end align-items-center gap-3 mt-4 mb-5 pb-5">
+          <button onclick="previewLanding()" class="btn btn-light rounded-pill px-4">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Preview Landing Page
+          </button>
+          <button onclick="saveAllCms()" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">
+            <i class="bi bi-save2 me-2"></i> Save All CMS Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { initDashboardShell, showToast } from '../scripts/dashboard-shell.js';
+  import { AuthStore, CmsStore } from '../scripts/store.js';
+
+  // Auth: admin only
+  const user = initDashboardShell({ activePage: 'cms', pageTitle: 'Website CMS Builder' });
+  if (!user || user.role !== 'admin') {
+    window.location.href = './index.html';
+  }
+
+  let cmsData = CmsStore.get();
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[char]);
+
+  // Tab switching
+  window.switchTab = function(tabId) {
+    document.querySelectorAll('.cms-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.cms-panel').forEach(p => p.classList.remove('active'));
+
+    const activeBtn = Array.from(document.querySelectorAll('.cms-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+    if (activeBtn) activeBtn.classList.add('active');
+
+    const panel = document.getElementById('tab-' + tabId);
+    if (panel) panel.classList.add('active');
+  };
+
+  // Populate form with existing CMS data
+  function loadForm() {
+    cmsData = CmsStore.get();
+
+    // Branding
+    document.getElementById('storeName').value = cmsData.branding.storeName || '';
+    document.getElementById('tagLine').value = cmsData.branding.tagLine || '';
+    document.getElementById('supportEmail').value = cmsData.branding.supportEmail || '';
+    document.getElementById('supportPhone').value = cmsData.branding.supportPhone || '';
+    document.getElementById('currency').value = cmsData.branding.currency || '₹';
+    document.getElementById('themeColor').value = cmsData.branding.themeColor || '#1e4a42';
+    document.getElementById('themeColorPicker').value = cmsData.branding.themeColor || '#1e4a42';
+
+    // Announcement
+    document.getElementById('announcementActive').checked = !!cmsData.announcement.active;
+    document.getElementById('announcementBadge').value = cmsData.announcement.badge || '';
+    document.getElementById('announcementText').value = cmsData.announcement.text || '';
+    document.getElementById('announcementLink').value = cmsData.announcement.link || '';
+
+    // Hero
+    document.getElementById('heroBadge').value = cmsData.hero.badge || '';
+    document.getElementById('titleLine1').value = cmsData.hero.titleLine1 || '';
+    document.getElementById('highlight').value = cmsData.hero.highlight || '';
+    document.getElementById('titleLine2').value = cmsData.hero.titleLine2 || '';
+    document.getElementById('heroSubtitle').value = cmsData.hero.subtitle || '';
+    document.getElementById('ctaPrimaryText').value = cmsData.hero.ctaPrimaryText || '';
+    document.getElementById('ctaPrimaryLink').value = cmsData.hero.ctaPrimaryLink || '';
+    document.getElementById('ctaSecondaryText').value = cmsData.hero.ctaSecondaryText || '';
+    document.getElementById('ctaSecondaryLink').value = cmsData.hero.ctaSecondaryLink || '';
+
+    document.getElementById('stat1Num').value = cmsData.hero.stat1Num || '';
+    document.getElementById('stat1Label').value = cmsData.hero.stat1Label || '';
+    document.getElementById('stat2Num').value = cmsData.hero.stat2Num || '';
+    document.getElementById('stat2Label').value = cmsData.hero.stat2Label || '';
+    document.getElementById('stat3Num').value = cmsData.hero.stat3Num || '';
+    document.getElementById('stat3Label').value = cmsData.hero.stat3Label || '';
+    document.getElementById('stat4Num').value = cmsData.hero.stat4Num || '';
+    document.getElementById('stat4Label').value = cmsData.hero.stat4Label || '';
+
+    // Features Section
+    document.getElementById('featuresBadge').value = cmsData.features.sectionBadge || '';
+    document.getElementById('featuresTitle').value = cmsData.features.sectionTitle || '';
+    document.getElementById('featuresSubtitle').value = cmsData.features.sectionSubtitle || '';
+    renderFeatures();
+
+    // Testimonials
+    document.getElementById('testBadge').value = cmsData.testimonials.sectionBadge || '';
+    document.getElementById('testTitle').value = cmsData.testimonials.sectionTitle || '';
+    renderTestimonials();
+
+    // CTA
+    document.getElementById('ctaBadge').value = cmsData.cta.badge || '';
+    document.getElementById('ctaTitle').value = cmsData.cta.title || '';
+    document.getElementById('ctaSubtitle').value = cmsData.cta.subtitle || '';
+    document.getElementById('ctaBtnPrimaryText').value = cmsData.cta.btnPrimaryText || '';
+    document.getElementById('ctaBtnPrimaryLink').value = cmsData.cta.btnPrimaryLink || './register.html';
+    document.getElementById('ctaBtnSecondaryText').value = cmsData.cta.btnSecondaryText || '';
+    document.getElementById('ctaBtnSecondaryLink').value = cmsData.cta.btnSecondaryLink || './store.html';
+
+    // Footer
+    document.getElementById('footerAbout').value = cmsData.footer.about || '';
+    document.getElementById('footerCopyright').value = cmsData.footer.copyright || '';
+    const visibility = cmsData.visibility || {};
+    document.getElementById('visibilityAnnouncement').checked = cmsData.announcement.active !== false && visibility.announcement !== false;
+    document.getElementById('visibilityHero').checked = visibility.hero !== false;
+    document.getElementById('visibilityFeatures').checked = visibility.features !== false;
+    document.getElementById('visibilityCatalog').checked = visibility.catalog !== false;
+    document.getElementById('visibilityTestimonials').checked = visibility.testimonials !== false;
+    document.getElementById('visibilityCta').checked = visibility.cta !== false;
+    document.getElementById('visibilityFooter').checked = visibility.footer !== false;
+    renderNavigation();
+    renderCmsPages();
+  }
+
+  // Render Feature Cards
+  function renderFeatures() {
+    const container = document.getElementById('featuresListContainer');
+    container.innerHTML = cmsData.features.items.map((f, idx) => `
+      <div class="cms-item-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge bg-light text-dark border">Feature #${idx + 1}</span>
+          <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeFeature(${idx})">
+            <i class="bi bi-trash3"></i> Remove
+          </button>
+        </div>
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="small text-muted">Icon Class</label>
+            <input type="text" class="cms-input small py-1" value="${escapeHtml(f.icon || 'bi-stars')}" onchange="updateFeatureProp(${idx}, 'icon', this.value)">
+          </div>
+          <div class="col-md-4">
+            <label class="small text-muted">Card Title</label>
+            <input type="text" class="cms-input small py-1" value="${escapeHtml(f.title || '')}" onchange="updateFeatureProp(${idx}, 'title', this.value)">
+          </div>
+          <div class="col-md-5">
+            <label class="small text-muted">Card Description</label>
+            <input type="text" class="cms-input small py-1" value="${escapeHtml(f.description || '')}" onchange="updateFeatureProp(${idx}, 'description', this.value)">
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.addFeatureCard = function() {
+    cmsData.features.items.push({
+      id: 'feat-' + Date.now(),
+      icon: 'bi-check2-circle',
+      color: '#1d725f',
+      title: 'New Feature Title',
+      description: 'Describe this benefit or capability for your shop customers.',
+    });
+    renderFeatures();
+  };
+
+  window.removeFeature = function(idx) {
+    cmsData.features.items.splice(idx, 1);
+    renderFeatures();
+  };
+
+  window.updateFeatureProp = function(idx, key, val) {
+    cmsData.features.items[idx][key] = val;
+  };
+
+  // Render Testimonials
+  function renderTestimonials() {
+    const container = document.getElementById('testimonialsListContainer');
+    container.innerHTML = cmsData.testimonials.items.map((t, idx) => `
+      <div class="cms-item-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge bg-light text-dark border">Testimonial #${idx + 1}</span>
+          <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeTestimonial(${idx})">
+            <i class="bi bi-trash3"></i> Remove
+          </button>
+        </div>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="small text-muted">Reviewer Name</label>
+            <input type="text" class="cms-input small py-1" value="${escapeHtml(t.name || '')}" onchange="updateTestimonialProp(${idx}, 'name', this.value)">
+          </div>
+          <div class="col-md-5">
+            <label class="small text-muted">Shop & City</label>
+            <input type="text" class="cms-input small py-1" value="${escapeHtml(t.shop || '')}" onchange="updateTestimonialProp(${idx}, 'shop', this.value)">
+          </div>
+          <div class="col-md-3">
+            <label class="small text-muted">Rating (1-5)</label>
+            <input type="number" min="1" max="5" class="cms-input small py-1" value="${escapeHtml(t.rating || 5)}" onchange="updateTestimonialProp(${idx}, 'rating', parseInt(this.value, 10))">
+          </div>
+          <div class="col-12 mt-2">
+            <label class="small text-muted">Review Quote</label>
+            <textarea class="cms-textarea small py-1" rows="2" onchange="updateTestimonialProp(${idx}, 'review', this.value)">${escapeHtml(t.review || '')}</textarea>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.addTestimonial = function() {
+    cmsData.testimonials.items.push({
+      id: 'test-' + Date.now(),
+      name: 'Retail Owner',
+      shop: 'Store, City',
+      rating: 5,
+      review: 'Write the customer testimonial quote here.',
+    });
+    renderTestimonials();
+  };
+
+  window.removeTestimonial = function(idx) {
+    cmsData.testimonials.items.splice(idx, 1);
+    renderTestimonials();
+  };
+
+  window.updateTestimonialProp = function(idx, key, val) {
+    cmsData.testimonials.items[idx][key] = val;
+  };
+
+  function renderNavigation() {
+    cmsData.navigation = Array.isArray(cmsData.navigation) ? cmsData.navigation : [];
+    const container = document.getElementById('navigationListContainer');
+    container.innerHTML = cmsData.navigation.map((item, idx) => `
+      <div class="cms-item-card cms-navigation-item">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-4"><label class="cms-form-label">Button label</label><input class="cms-input" maxlength="40" value="${escapeHtml(item.label)}" oninput="updateNavigation(${idx},'label',this.value)"></div>
+          <div class="col-md-5"><label class="cms-form-label">Destination URL</label><input class="cms-input" maxlength="240" value="${escapeHtml(item.href)}" oninput="updateNavigation(${idx},'href',this.value)" placeholder="./store.html"></div>
+          <div class="col-md-3 d-flex align-items-center gap-3">
+            <label class="cms-inline-check"><input type="checkbox" ${item.visible !== false ? 'checked' : ''} onchange="updateNavigation(${idx},'visible',this.checked)">Visible</label>
+            <label class="cms-inline-check"><input type="checkbox" ${item.primary ? 'checked' : ''} onchange="updateNavigation(${idx},'primary',this.checked)">Primary</label>
+            <button type="button" class="cms-icon-action cms-delete-action" aria-label="Remove navigation button" onclick="removeNavigationItem(${idx})"><i class="bi bi-trash3"></i></button>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+          <button type="button" class="cms-text-action" ${idx === 0 ? 'disabled' : ''} onclick="moveNavigationItem(${idx},-1)">Move up</button>
+          <button type="button" class="cms-text-action" ${idx === cmsData.navigation.length - 1 ? 'disabled' : ''} onclick="moveNavigationItem(${idx},1)">Move down</button>
+        </div>
+      </div>
+    `).join('') || '<p class="cms-empty-state">No navigation buttons. Add one to get started.</p>';
+  }
+
+  window.updateNavigation = function(index, key, value) {
+    if (!cmsData.navigation[index]) return;
+    cmsData.navigation[index][key] = value;
+    if (key === 'primary' && value) {
+      cmsData.navigation.forEach((item, idx) => { if (idx !== index) item.primary = false; });
+      renderNavigation();
+    }
+  };
+
+  window.addNavigationItem = function() {
+    cmsData.navigation.push({ id: `nav-${Date.now()}`, label: 'New link', href: './landing.html', visible: true, primary: false });
+    renderNavigation();
+  };
+
+  window.removeNavigationItem = function(index) {
+    cmsData.navigation.splice(index, 1);
+    renderNavigation();
+  };
+
+  window.moveNavigationItem = function(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= cmsData.navigation.length) return;
+    [cmsData.navigation[index], cmsData.navigation[target]] = [cmsData.navigation[target], cmsData.navigation[index]];
+    renderNavigation();
+  };
+
+  const RESERVED_SLUGS = new Set(['index', 'landing', 'store', 'login', 'register', 'product-detail', 'content-page', 'dashboard']);
+  const normalizeSlug = value => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  window.createCmsPage = function() {
+    const titleInput = document.getElementById('newPageTitle');
+    const slugInput = document.getElementById('newPageSlug');
+    const title = titleInput.value.trim();
+    const slug = normalizeSlug(slugInput.value || title);
+    if (!title || !slug || slug.length > 50 || RESERVED_SLUGS.has(slug)) {
+      showToast('Enter a page title and a valid, non-reserved URL slug.', 'warning');
+      return;
+    }
+    if (cmsData.pages.some(page => page.slug === slug)) {
+      showToast('A page with that URL slug already exists.', 'error');
+      return;
+    }
+    cmsData.pages.push({
+      id: `page-${Date.now()}`,
+      slug,
+      title,
+      published: true,
+      showInNav: false,
+      sections: [{
+        id: `section-${Date.now()}`,
+        type: 'hero',
+        title,
+        body: 'Welcome to our store.',
+        imageUrl: '',
+        buttonText: '',
+        buttonHref: './store.html',
+      }],
+    });
+    titleInput.value = '';
+    slugInput.value = '';
+    renderCmsPages();
+    showToast('Page created. Save your CMS changes to publish it.', 'success');
+  };
+
+  function renderCmsPages() {
+    cmsData.pages = Array.isArray(cmsData.pages) ? cmsData.pages : [];
+    const container = document.getElementById('pagesListContainer');
+    container.innerHTML = cmsData.pages.map((page, pageIndex) => `
+      <article class="cms-page-card">
+        <div class="cms-page-fields">
+          <label><span>Page title</span><input class="cms-input" maxlength="80" value="${escapeHtml(page.title)}" oninput="updateCmsPage(${pageIndex},'title',this.value)"></label>
+          <label><span>URL slug</span><input class="cms-input" maxlength="50" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="${escapeHtml(page.slug)}" oninput="updateCmsPage(${pageIndex},'slug',this.value)"></label>
+        </div>
+        <div class="cms-page-actions">
+          <label class="cms-inline-check"><input type="checkbox" ${page.published !== false ? 'checked' : ''} onchange="updateCmsPage(${pageIndex},'published',this.checked)">Published</label>
+          <label class="cms-inline-check"><input type="checkbox" ${page.showInNav ? 'checked' : ''} onchange="updateCmsPage(${pageIndex},'showInNav',this.checked)">Show in navigation</label>
+          <a class="cms-text-action" href="../content-page.html?slug=${encodeURIComponent(page.slug)}" target="_blank" rel="noopener">Preview page</a>
+          <button type="button" class="cms-icon-action cms-delete-action" aria-label="Delete page" onclick="deleteCmsPage(${pageIndex})"><i class="bi bi-trash3"></i></button>
+        </div>
+        <div class="cms-sections-heading"><strong>Page sections</strong><button type="button" class="btn btn-primary btn-sm rounded-pill px-3" onclick="addCmsSection(${pageIndex})"><i class="bi bi-plus-lg me-1"></i>Add section</button></div>
+        <div>${(page.sections || []).map((section, sectionIndex) => `
+          <section class="cms-builder-section">
+            <div class="cms-builder-section-heading">
+              <label><span>Section type</span><select class="cms-select" onchange="updateCmsSection(${pageIndex},${sectionIndex},'type',this.value)">
+                ${['hero','heading','text','image','button','callout','spacer'].map(type => `<option value="${type}" ${section.type === type ? 'selected' : ''}>${type[0].toUpperCase() + type.slice(1)}</option>`).join('')}
+              </select></label>
+              <div class="d-flex gap-2">
+                <button type="button" class="cms-icon-action" aria-label="Move section up" ${sectionIndex === 0 ? 'disabled' : ''} onclick="moveCmsSection(${pageIndex},${sectionIndex},-1)"><i class="bi bi-arrow-up"></i></button>
+                <button type="button" class="cms-icon-action" aria-label="Move section down" ${sectionIndex === (page.sections || []).length - 1 ? 'disabled' : ''} onclick="moveCmsSection(${pageIndex},${sectionIndex},1)"><i class="bi bi-arrow-down"></i></button>
+                <button type="button" class="cms-icon-action cms-delete-action" aria-label="Delete section" onclick="removeCmsSection(${pageIndex},${sectionIndex})"><i class="bi bi-trash3"></i></button>
+              </div>
+            </div>
+            <div class="cms-section-fields">
+              <label><span>Heading</span><input class="cms-input" maxlength="120" value="${escapeHtml(section.title)}" oninput="updateCmsSection(${pageIndex},${sectionIndex},'title',this.value)"></label>
+              <label class="cms-section-wide"><span>Text</span><textarea class="cms-textarea" rows="3" maxlength="3000" oninput="updateCmsSection(${pageIndex},${sectionIndex},'body',this.value)">${escapeHtml(section.body)}</textarea></label>
+              <label><span>Image URL (image sections)</span><input class="cms-input" maxlength="500" value="${escapeHtml(section.imageUrl)}" oninput="updateCmsSection(${pageIndex},${sectionIndex},'imageUrl',this.value)"></label>
+              <label><span>Button label</span><input class="cms-input" maxlength="50" value="${escapeHtml(section.buttonText)}" oninput="updateCmsSection(${pageIndex},${sectionIndex},'buttonText',this.value)"></label>
+              <label><span>Button destination</span><input class="cms-input" maxlength="240" value="${escapeHtml(section.buttonHref)}" oninput="updateCmsSection(${pageIndex},${sectionIndex},'buttonHref',this.value)"></label>
+            </div>
+          </section>
+        `).join('') || '<p class="cms-empty-state">This page has no sections. Add one to start building.</p>'}</div>
+      </article>
+    `).join('') || '<p class="cms-empty-state">No custom pages yet. Create a page above.</p>';
+  }
+
+  window.updateCmsPage = function(index, key, value) {
+    if (!cmsData.pages[index]) return;
+    const page = cmsData.pages[index];
+    page[key] = key === 'slug' ? normalizeSlug(value) : value;
+    const navId = `page-link-${page.id}`;
+    const navItem = cmsData.navigation.find(item => item.id === navId);
+    if (key === 'showInNav' && value && !navItem) {
+      cmsData.navigation.push({ id: navId, label: page.title, href: `./content-page.html?slug=${page.slug}`, visible: true, primary: false });
+    } else if (key === 'showInNav' && !value && navItem) {
+      cmsData.navigation = cmsData.navigation.filter(item => item.id !== navId);
+    } else if (navItem && key === 'title') {
+      navItem.label = value;
+    } else if (navItem && key === 'slug') {
+      navItem.href = `./content-page.html?slug=${page.slug}`;
+    }
+    if (key === 'showInNav') renderNavigation();
+  };
+
+  window.deleteCmsPage = function(index) {
+    if (!confirm(`Delete the page "${cmsData.pages[index]?.title || ''}" and all its sections?`)) return;
+    const [removed] = cmsData.pages.splice(index, 1);
+    cmsData.navigation = cmsData.navigation.filter(item => item.href !== `./content-page.html?slug=${removed.slug}`);
+    renderCmsPages();
+    renderNavigation();
+  };
+
+  window.addCmsSection = function(pageIndex) {
+    const sections = cmsData.pages[pageIndex].sections || (cmsData.pages[pageIndex].sections = []);
+    sections.push({ id: `section-${Date.now()}`, type: 'text', title: 'New section', body: 'Add your content here.', imageUrl: '', buttonText: '', buttonHref: './store.html' });
+    renderCmsPages();
+  };
+
+  window.updateCmsSection = function(pageIndex, sectionIndex, key, value) {
+    const section = cmsData.pages[pageIndex]?.sections?.[sectionIndex];
+    if (section) section[key] = value;
+  };
+
+  window.removeCmsSection = function(pageIndex, sectionIndex) {
+    cmsData.pages[pageIndex].sections.splice(sectionIndex, 1);
+    renderCmsPages();
+  };
+
+  window.moveCmsSection = function(pageIndex, sectionIndex, direction) {
+    const sections = cmsData.pages[pageIndex]?.sections || [];
+    const target = sectionIndex + direction;
+    if (target < 0 || target >= sections.length) return;
+    [sections[sectionIndex], sections[target]] = [sections[target], sections[sectionIndex]];
+    renderCmsPages();
+  };
+
+  // Save All
+  window.saveAllCms = function() {
+    // Collect from inputs
+    cmsData.branding = {
+      storeName: document.getElementById('storeName').value,
+      tagLine: document.getElementById('tagLine').value,
+      supportEmail: document.getElementById('supportEmail').value,
+      supportPhone: document.getElementById('supportPhone').value,
+      currency: document.getElementById('currency').value,
+      themeColor: document.getElementById('themeColor').value,
+    };
+
+    cmsData.announcement = {
+      active: document.getElementById('announcementActive').checked,
+      badge: document.getElementById('announcementBadge').value,
+      text: document.getElementById('announcementText').value,
+      link: document.getElementById('announcementLink').value,
+    };
+
+    cmsData.hero = {
+      badge: document.getElementById('heroBadge').value,
+      titleLine1: document.getElementById('titleLine1').value,
+      highlight: document.getElementById('highlight').value,
+      titleLine2: document.getElementById('titleLine2').value,
+      subtitle: document.getElementById('heroSubtitle').value,
+      ctaPrimaryText: document.getElementById('ctaPrimaryText').value,
+      ctaPrimaryLink: document.getElementById('ctaPrimaryLink').value,
+      ctaSecondaryText: document.getElementById('ctaSecondaryText').value,
+      ctaSecondaryLink: document.getElementById('ctaSecondaryLink').value,
+      stat1Num: document.getElementById('stat1Num').value,
+      stat1Label: document.getElementById('stat1Label').value,
+      stat2Num: document.getElementById('stat2Num').value,
+      stat2Label: document.getElementById('stat2Label').value,
+      stat3Num: document.getElementById('stat3Num').value,
+      stat3Label: document.getElementById('stat3Label').value,
+      stat4Num: document.getElementById('stat4Num').value,
+      stat4Label: document.getElementById('stat4Label').value,
+    };
+
+    cmsData.features.sectionBadge = document.getElementById('featuresBadge').value;
+    cmsData.features.sectionTitle = document.getElementById('featuresTitle').value;
+    cmsData.features.sectionSubtitle = document.getElementById('featuresSubtitle').value;
+
+    cmsData.testimonials.sectionBadge = document.getElementById('testBadge').value;
+    cmsData.testimonials.sectionTitle = document.getElementById('testTitle').value;
+
+    cmsData.cta = {
+      badge: document.getElementById('ctaBadge').value,
+      title: document.getElementById('ctaTitle').value,
+      subtitle: document.getElementById('ctaSubtitle').value,
+      btnPrimaryText: document.getElementById('ctaBtnPrimaryText').value,
+      btnPrimaryLink: document.getElementById('ctaBtnPrimaryLink').value,
+      btnSecondaryText: document.getElementById('ctaBtnSecondaryText').value,
+      btnSecondaryLink: document.getElementById('ctaBtnSecondaryLink').value,
+    };
+
+    cmsData.footer = {
+      about: document.getElementById('footerAbout').value,
+      copyright: document.getElementById('footerCopyright').value,
+    };
+
+    cmsData.visibility = {
+      announcement: document.getElementById('visibilityAnnouncement').checked,
+      hero: document.getElementById('visibilityHero').checked,
+      features: document.getElementById('visibilityFeatures').checked,
+      catalog: document.getElementById('visibilityCatalog').checked,
+      testimonials: document.getElementById('visibilityTestimonials').checked,
+      cta: document.getElementById('visibilityCta').checked,
+      footer: document.getElementById('visibilityFooter').checked,
+    };
+
+    const slugSet = new Set();
+    for (const page of cmsData.pages) {
+      const pageTitle = String(page.title || '').trim();
+      if (!pageTitle || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(page.slug) || RESERVED_SLUGS.has(page.slug)) {
+        showToast(`Check the title and URL slug for "${page.title || 'Untitled page'}".`, 'warning');
+        return;
+      }
+      if (slugSet.has(page.slug)) {
+        showToast(`The URL slug "${page.slug}" is used by more than one page.`, 'error');
+        return;
+      }
+      slugSet.add(page.slug);
+    }
+
+    try {
+      CmsStore.save(cmsData);
+      showToast('CMS changes saved successfully.', 'success');
+    } catch (error) {
+      console.error('Unable to save CMS changes.', error);
+      showToast('Could not save CMS changes. Check available browser storage and try again.', 'error');
+    }
+  };
+
+  window.previewLanding = function() {
+    window.open('../landing.html', '_blank');
+  };
+
+  window.resetDefaults = function() {
+    if (confirm('Are you sure you want to reset all CMS content back to factory defaults?')) {
+      cmsData = CmsStore.reset();
+      loadForm();
+      showToast('CMS content reset to defaults.', 'info');
+    }
+  };
+
+  // Init
+  loadForm();
+</script>
+</body>
+</html>
